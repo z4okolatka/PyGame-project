@@ -1,4 +1,5 @@
 import pygame as pg
+import screeninfo
 import src.setting as settings
 import main
 
@@ -7,7 +8,11 @@ class screenCamera:
         self.game: main.Game = game
 
         # main surface
-        self.display = pg.display.set_mode((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
+        if settings.FULLSCREEN:
+            monitor = screeninfo.get_monitors()[0]
+            self.display = pg.display.set_mode((monitor.width, monitor.height), pg.FULLSCREEN)
+        else:
+            self.display = pg.display.set_mode((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
     
     def fix_at(self, obj):
         """Fixing screen camera at some object so that camera follows it"""

@@ -3,6 +3,7 @@ from src.classes import screenCamera
 from src.classes import player
 import src.setting as settings
 
+
 class Game:
     def __init__(self):
         pg.init()
@@ -10,6 +11,7 @@ class Game:
         self.FPS = settings.FPS
         self.clock = pg.time.Clock()
 
+        self.deltatime = 1e-10
         self.camera = screenCamera.screenCamera(self)
         self.player = player.Player(self)
 
@@ -21,7 +23,7 @@ class Game:
                 if event.type == pg.QUIT:
                     running = False
 
-            #updating everything
+            # updating everything
             self.update()
 
             # drawing everything
@@ -31,18 +33,16 @@ class Game:
             pg.display.flip()
             self.deltatime = self.clock.tick(self.FPS) / 1000
 
-            # using deltatime to normalize speeds
-            ...
-
         pg.quit()
 
     def update(self):
         self.player.update()
-    
+
     def draw(self):
-        self.camera.display.fill((0, 0, 0))
+        self.camera.display.fill((50, 50, 50))
 
         self.player.draw(self.camera.display)
+
 
 if __name__ == "__main__":
     game = Game()

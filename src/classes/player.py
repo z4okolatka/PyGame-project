@@ -1,6 +1,7 @@
 import pygame as pg
 import src.setting as settings
 import main
+import math
 
 
 class Player(pg.sprite.Sprite):
@@ -12,41 +13,55 @@ class Player(pg.sprite.Sprite):
         self.image.fill((255, 255, 255))
         self.rect = self.image.get_rect()
 
-        # real coordinates
+        # float coordinates
         if cords:
             self.rect.topleft = cords
         else:
+            display = self.game.camera.display
             self.rect.topleft = ((
-                settings.WINDOW_WIDTH // 2 - self.rect.width // 2,
-                settings.WINDOW_HEIGHT // 2 - self.rect.height // 2
+                display.get_width() // 2 - self.rect.width // 2,
+                display.get_height() // 2 - self.rect.height // 2
             ))
+
         self.x = self.rect.x
         self.y = self.rect.y
-
-        # states
         self.vx = 0
         self.vy = 0
-        self.jumping = False
-        self.standingOnGround = False
+
+        # attributes
+        self._lastKeyboard = pg.key.get_pressed()
+
+    def keydown(self, key, pressed):
+        """Returns true if key was just pressed"""
+        return (not self._lastKeyboard[key]) and pressed[key]
 
     def update(self):
         # keyboard input
         keyboard = pg.key.get_pressed()
+
+        # horizontal movement
+        if self.keydown(pg.K_d, keyboard) or self.keydown(pg.K_a, keyboard):
+            self.vx = 0
         if keyboard[pg.K_d]:
-            self.vx = settings.PLAYER_SPEED_X * self.game.deltatime
+            self.vx += 30 * self.game.deltatime
         if keyboard[pg.K_a]:
-            self.vx = -settings.PLAYER_SPEED_X * self.game.deltatime
+            self.vx -= 30 * self.game.deltatime
+        if not keyboard[pg.K_a] and not keyboard[pg.K_d] and self.vx:
+            self.vx *= .92  # friction coefficient
+            if abs(self.vx) < 1:
+                self.vx = 0
 
-        # stuff
-        ...
-
-        # updating position
+        # normalize horizontal speed
+        if abs(self.vx) >= settings.MAX_HORIZONTAL_SPEED * self.game.deltatime:
+            self.vx /= abs(self.vx)
+            self.vx *= settings.MAX_HORIZONTAL_SPEED * self.game.deltatime
         self.x += self.vx
-        self.y += self.vy
-        self.vx = 0
 
-        self.rect.x = self.x
-        self.rect.y = self.y
+        # flooring cords
+        self.rect.x = math.floor(self.x)
+        self.rect.y = math.floor(self.y)
+
+        self._lastKeyboard = keyboard
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
