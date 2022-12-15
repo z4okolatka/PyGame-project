@@ -31,6 +31,10 @@ class Player(pg.sprite.Sprite):
         self.max_horizontal_speed = settings.PLAYER_MAX_HORIZONTAL_SPEED
         self.horizontal_acceleration = settings.PLAYER_HORIZONTAL_ACCELERATION
 
+        self.max_vertical_speed = settings.PLAYER_MAX_VERTICAL_SPEED
+        self.vertical_acceleration = settings.PLAYER_VERTICAL_ACCELERATION
+        self.jump_speed = settings.PLAYER_JUMP_SPEED
+
         # attributes
         self._lastKeyboard = pg.key.get_pressed()
 
@@ -39,28 +43,34 @@ class Player(pg.sprite.Sprite):
         return (not self._lastKeyboard[key]) and pressed[key]
 
     def update(self):
-        self.horizontal_movement()
+        kb = pg.key.get_pressed()
+
+        self.horizontal_movement(kb)
         self.normalize_horizontal_speed()
-        self.rounding_cords()
+        self.move_x()
 
-    def horizontal_movement(self):
-        # keyboard input
-        keyboard = pg.key.get_pressed()
+        self.vertical_movement(kb)
+        self.normalize_vertical_speed()
+        self.move_y()
 
+        self._lastKeyboard = kb
+
+    def horizontal_movement(self, keyboard):
         if self.keydown(pg.K_d, keyboard) or self.keydown(pg.K_a, keyboard):
             self.vx = 0
         if keyboard[pg.K_d]:
-            self.vx += self.horizontal_acceleration * self.max_horizontal_speed * self.game.deltatime
+            self.vx += self.horizontal_acceleration * self.game.deltatime
         if keyboard[pg.K_a]:
-            self.vx -= self.horizontal_acceleration * self.max_horizontal_speed * self.game.deltatime
+            self.vx -= self.horizontal_acceleration * self.game.deltatime
         if not keyboard[pg.K_a] and not keyboard[pg.K_d] and self.vx:
             if self.vx < 0:
-                self.vx += self.horizontal_acceleration * self.max_horizontal_speed * self.game.deltatime
+                self.vx += self.horizontal_acceleration * self.game.deltatime
             else:
-                self.vx -= self.horizontal_acceleration * self.max_horizontal_speed * self.game.deltatime
+                self.vx -= self.horizontal_acceleration * self.game.deltatime
             if abs(self.vx) < 1:
                 self.vx = 0
-        self._lastKeyboard = keyboard
+
+        self.rect.x = self.x
 
     def normalize_horizontal_speed(self):
         if abs(self.vx) >= self.max_horizontal_speed * self.game.deltatime:
@@ -68,9 +78,22 @@ class Player(pg.sprite.Sprite):
             self.vx *= self.max_horizontal_speed * self.game.deltatime
         self.x += self.vx
 
-    def rounding_cords(self):
-        self.rect.x = round(self.x)
-        self.rect.y = round(self.y)
+    def move_x(self):
+        self.rect.x = self.x
+
+    def vertical_movement(self, keyboard):
+        self.vy += self.vertical_acceleration
+        if self.keydown(pg.K_SPACE, keyboard):
+            self.vy = self.jump_speed * -1
+
+    def normalize_vertical_speed(self):
+        if abs(self.vy) >= self.max_vertical_speed * self.game.deltatime:
+            self.vy /= abs(self.vy)
+            self.vy *= self.max_vertical_speed * self.game.deltatime
+        self.y += self.vy
+
+    def move_y(self):
+        self.rect.y = self.y
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
