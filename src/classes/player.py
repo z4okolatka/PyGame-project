@@ -1,9 +1,10 @@
 import pygame as pg
 import src.setting as settings
+from src.classes import coordHelper
 import main
 
 
-class Player(pg.sprite.Sprite):
+class Player(pg.sprite.Sprite, coordHelper.FloatCords):
     def __init__(self, game, cords=None):
         super().__init__()
         self.game: main.Game = game
@@ -43,11 +44,13 @@ class Player(pg.sprite.Sprite):
         return (not self._lastKeyboard[key]) and pressed[key]
 
     def update(self):
+        # keyboard input
         kb = pg.key.get_pressed()
 
         self.horizontal_movement(kb)
         self.normalize_horizontal_speed()
         self.move_x()
+        self.horizontal_collision()
 
         self.vertical_movement(kb)
         self.normalize_vertical_speed()
@@ -70,16 +73,30 @@ class Player(pg.sprite.Sprite):
             if abs(self.vx) < 1:
                 self.vx = 0
 
-        self.rect.x = self.x
-
     def normalize_horizontal_speed(self):
         if abs(self.vx) >= self.max_horizontal_speed * self.game.deltatime:
             self.vx /= abs(self.vx)
             self.vx *= self.max_horizontal_speed * self.game.deltatime
-        self.x += self.vx
 
     def move_x(self):
-        self.rect.x = self.x
+        self.x += self.vx
+        self.rect.x = round(self.x)
+
+    def horizontal_collision(self):
+        border_rect = self.rect.copy()
+
+        for sprite in self.game.collision_objects:
+            if sprite.rect.colliderect(border_rect):
+                if border_rect.centerx <= sprite.rect.centerx and self.vx > 0:
+                    self.right = sprite.rect.left
+                    self.vx = 0
+                    break
+                elif border_rect.centerx > sprite.rect.centerx and self.vx < 0:
+                    self.left = sprite.rect.right
+                    self.vx = 0
+                    break
+
+        self.rect.x = round(self.x)
 
     def vertical_movement(self, keyboard):
         self.vy += self.vertical_acceleration
@@ -90,10 +107,10 @@ class Player(pg.sprite.Sprite):
         if abs(self.vy) >= self.max_vertical_speed * self.game.deltatime:
             self.vy /= abs(self.vy)
             self.vy *= self.max_vertical_speed * self.game.deltatime
-        self.y += self.vy
 
     def move_y(self):
-        self.rect.y = self.y
+        self.y += self.vy
+        self.rect.y = round(self.y)
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
