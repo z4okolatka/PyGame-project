@@ -1,9 +1,10 @@
 import pygame as pg
 import src.setting as settings
+from src.classes import coordHelper
 import main
 
 
-class Player(pg.sprite.Sprite):
+class Player(pg.sprite.Sprite, coordHelper.FloatCords):
     def __init__(self, game, cords=None):
         super().__init__()
         self.game: main.Game = game
@@ -39,38 +40,55 @@ class Player(pg.sprite.Sprite):
         return (not self._lastKeyboard[key]) and pressed[key]
 
     def update(self):
-        self.horizontal_movement()
-        self.normalize_horizontal_speed()
-        self.rounding_cords()
-
-    def horizontal_movement(self):
         # keyboard input
-        keyboard = pg.key.get_pressed()
+        kb = pg.key.get_pressed()
 
+        self.horizontal_movement(kb)
+        self.normalize_horizontal_speed()
+        self.move_x()
+        self.horizontal_collision()
+
+        self._lastKeyboard = kb
+
+    def horizontal_movement(self, keyboard):
         if self.keydown(pg.K_d, keyboard) or self.keydown(pg.K_a, keyboard):
             self.vx = 0
         if keyboard[pg.K_d]:
-            self.vx += self.horizontal_acceleration * self.max_horizontal_speed * self.game.deltatime
+            self.vx += self.horizontal_acceleration * self.game.deltatime
         if keyboard[pg.K_a]:
-            self.vx -= self.horizontal_acceleration * self.max_horizontal_speed * self.game.deltatime
+            self.vx -= self.horizontal_acceleration * self.game.deltatime
         if not keyboard[pg.K_a] and not keyboard[pg.K_d] and self.vx:
             if self.vx < 0:
-                self.vx += self.horizontal_acceleration * self.max_horizontal_speed * self.game.deltatime
+                self.vx += self.horizontal_acceleration * self.game.deltatime
             else:
-                self.vx -= self.horizontal_acceleration * self.max_horizontal_speed * self.game.deltatime
+                self.vx -= self.horizontal_acceleration * self.game.deltatime
             if abs(self.vx) < 1:
                 self.vx = 0
-        self._lastKeyboard = keyboard
 
     def normalize_horizontal_speed(self):
         if abs(self.vx) >= self.max_horizontal_speed * self.game.deltatime:
             self.vx /= abs(self.vx)
             self.vx *= self.max_horizontal_speed * self.game.deltatime
-        self.x += self.vx
 
-    def rounding_cords(self):
+    def move_x(self):
+        self.x += self.vx
         self.rect.x = round(self.x)
-        self.rect.y = round(self.y)
+
+    def horizontal_collision(self):
+        borderRect = self.rect.copy()
+
+        for sprite in self.game.collision_objects:
+            if sprite.rect.colliderect(borderRect):
+                if borderRect.centerx <= sprite.rect.centerx and self.vx > 0:
+                    self.right = sprite.rect.left
+                    self.vx = 0
+                    break
+                elif borderRect.centerx > sprite.rect.centerx and self.vx < 0:
+                    self.left = sprite.rect.right
+                    self.vx = 0
+                    break
+        
+        self.rect.x = round(self.x)
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
