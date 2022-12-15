@@ -1,7 +1,6 @@
 import pygame as pg
 import src.setting as settings
 import main
-import math
 
 
 class Player(pg.sprite.Sprite):
@@ -29,6 +28,9 @@ class Player(pg.sprite.Sprite):
         self.vx = 0
         self.vy = 0
 
+        self.max_horizontal_speed = settings.PLAYER_MAX_HORIZONTAL_SPEED
+        self.horizontal_acceleration = settings.PLAYER_HORIZONTAL_ACCELERATION
+
         # attributes
         self._lastKeyboard = pg.key.get_pressed()
 
@@ -37,35 +39,38 @@ class Player(pg.sprite.Sprite):
         return (not self._lastKeyboard[key]) and pressed[key]
 
     def update(self):
+        self.horizontal_movement()
+        self.normalize_horizontal_speed()
+        self.rounding_cords()
+
+    def horizontal_movement(self):
         # keyboard input
         keyboard = pg.key.get_pressed()
 
-        # horizontal movement
         if self.keydown(pg.K_d, keyboard) or self.keydown(pg.K_a, keyboard):
             self.vx = 0
         if keyboard[pg.K_d]:
-            self.vx += .3 * settings.MAX_HORIZONTAL_SPEED * self.game.deltatime
+            self.vx += self.horizontal_acceleration * self.max_horizontal_speed * self.game.deltatime
         if keyboard[pg.K_a]:
-            self.vx -= .3 * settings.MAX_HORIZONTAL_SPEED * self.game.deltatime
+            self.vx -= self.horizontal_acceleration * self.max_horizontal_speed * self.game.deltatime
         if not keyboard[pg.K_a] and not keyboard[pg.K_d] and self.vx:
             if self.vx < 0:
-                self.vx += .3 * settings.MAX_HORIZONTAL_SPEED * self.game.deltatime
+                self.vx += self.horizontal_acceleration * self.max_horizontal_speed * self.game.deltatime
             else:
-                self.vx -= .3 * settings.MAX_HORIZONTAL_SPEED * self.game.deltatime
+                self.vx -= self.horizontal_acceleration * self.max_horizontal_speed * self.game.deltatime
             if abs(self.vx) < 1:
                 self.vx = 0
+        self._lastKeyboard = keyboard
 
-        # normalize horizontal speed
-        if abs(self.vx) >= settings.MAX_HORIZONTAL_SPEED * self.game.deltatime:
+    def normalize_horizontal_speed(self):
+        if abs(self.vx) >= self.max_horizontal_speed * self.game.deltatime:
             self.vx /= abs(self.vx)
-            self.vx *= settings.MAX_HORIZONTAL_SPEED * self.game.deltatime
+            self.vx *= self.max_horizontal_speed * self.game.deltatime
         self.x += self.vx
 
-        # flooring cords
+    def rounding_cords(self):
         self.rect.x = round(self.x)
         self.rect.y = round(self.y)
-
-        self._lastKeyboard = keyboard
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)

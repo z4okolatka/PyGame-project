@@ -12,7 +12,7 @@ class Game:
         self.clock = pg.time.Clock()
 
         self.deltatime = 1e-10
-        self.camera = screenCamera.screenCamera(self)
+        self.camera = screenCamera.ScreenCamera(self)
         self.player = player.Player(self)
 
     def run(self):
