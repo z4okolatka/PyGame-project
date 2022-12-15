@@ -20,7 +20,15 @@ class Game:
             block.Block((5, self.camera.display.get_height() / 2),
                         (10, self.camera.display.get_height())),
             block.Block((self.camera.display.get_width(
-            ) - 5, self.camera.display.get_height() / 2), (10, self.camera.display.get_height()))
+            ) - 5, self.camera.display.get_height() / 2), (10, self.camera.display.get_height())),
+            block.Block((self.camera.display.get_width() // 2, self.camera.display.get_height() - 5),
+                        (self.camera.display.get_width(), 10)),
+            block.Block((self.camera.display.get_width() - 200, 400),
+                        (400, 100)),
+            block.Block((200, 400),
+                        (400, 100)),
+            block.Block((self.camera.display.get_width()//2, 650),
+                        (300, 100)),
         ])
 
     def run(self):

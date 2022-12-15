@@ -55,8 +55,10 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
         self.vertical_movement(kb)
         self.normalize_vertical_speed()
         self.move_y()
+        self.vertical_collision()
 
         self._lastKeyboard = kb
+
 
     def horizontal_movement(self, keyboard):
         if self.keydown(pg.K_d, keyboard) or self.keydown(pg.K_a, keyboard):
@@ -99,9 +101,9 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
         self.rect.x = round(self.x)
 
     def vertical_movement(self, keyboard):
-        self.vy += self.vertical_acceleration
         if self.keydown(pg.K_SPACE, keyboard):
             self.vy = self.jump_speed * -1
+        self.vy += self.vertical_acceleration
 
     def normalize_vertical_speed(self):
         if abs(self.vy) >= self.max_vertical_speed * self.game.deltatime:
@@ -110,6 +112,23 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
 
     def move_y(self):
         self.y += self.vy
+        self.rect.y = round(self.y)
+
+    def vertical_collision(self):
+        border_rect = self.rect.copy()
+
+        for sprite in self.game.collision_objects:
+            if sprite.rect.colliderect(border_rect):
+                if border_rect.bottom >= sprite.rect.top and abs(self.vy) > 0 and\
+                        abs(border_rect.bottom - sprite.rect.top) < abs(border_rect.top - sprite.rect.bottom):
+                    self.vy = 0
+                    self.bottom = sprite.rect.top
+                    break
+                elif border_rect.top <= sprite.rect.bottom and abs(self.vy) > 0:
+                    self.vy = 0
+                    self.top = sprite.rect.bottom
+                    break
+
         self.rect.y = round(self.y)
 
     def draw(self, surface):
