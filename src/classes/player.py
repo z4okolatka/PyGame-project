@@ -6,6 +6,7 @@ import math
 
 class Player(pg.sprite.Sprite):
     def __init__(self, game, cords=None):
+        super().__init__()
         self.game: main.Game = game
 
         # surface
@@ -43,11 +44,14 @@ class Player(pg.sprite.Sprite):
         if self.keydown(pg.K_d, keyboard) or self.keydown(pg.K_a, keyboard):
             self.vx = 0
         if keyboard[pg.K_d]:
-            self.vx += 30 * self.game.deltatime
+            self.vx += .3 * settings.MAX_HORIZONTAL_SPEED * self.game.deltatime
         if keyboard[pg.K_a]:
-            self.vx -= 30 * self.game.deltatime
+            self.vx -= .3 * settings.MAX_HORIZONTAL_SPEED * self.game.deltatime
         if not keyboard[pg.K_a] and not keyboard[pg.K_d] and self.vx:
-            self.vx *= .92  # friction coefficient
+            if self.vx < 0:
+                self.vx += .3 * settings.MAX_HORIZONTAL_SPEED * self.game.deltatime
+            else:
+                self.vx -= .3 * settings.MAX_HORIZONTAL_SPEED * self.game.deltatime
             if abs(self.vx) < 1:
                 self.vx = 0
 
@@ -58,8 +62,8 @@ class Player(pg.sprite.Sprite):
         self.x += self.vx
 
         # flooring cords
-        self.rect.x = math.floor(self.x)
-        self.rect.y = math.floor(self.y)
+        self.rect.x = round(self.x)
+        self.rect.y = round(self.y)
 
         self._lastKeyboard = keyboard
 
