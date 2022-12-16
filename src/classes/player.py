@@ -116,7 +116,7 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
     def move_y(self):
         self.y += self.vy
         if self.vy > 0 and self._jump_height:
-            print(self.y - self._jump_height)
+            # print(self.y - self._jump_height)
             self._jump_height = 0
         self.rect.y = round(self.y)
 

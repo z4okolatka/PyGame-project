@@ -13,7 +13,10 @@ class Game:
         self.FPS = settings.FPS
         self.clock = pg.time.Clock()
 
+        # attributes
         self.deltatime = 1e-10
+
+        # objects and object gorups
         self.camera = screenCamera.ScreenCamera(self)
         self.player = player.Player(self)
         self.collision_objects = [
@@ -47,10 +50,6 @@ class Game:
             # drawing everything
             self.draw()
 
-            # render
-            self.render.update({'player': self.player,
-                                'collision_objects': self.collision_objects})
-
             # game loop
             pg.display.flip()
             self.deltatime = self.clock.tick(self.FPS) / 1000
@@ -59,12 +58,11 @@ class Game:
 
     def update(self):
         self.player.update()
+        self.camera.follow_player()
 
     def draw(self):
         self.camera.display.fill((50, 50, 50))
-
-        # self.player.draw(self.camera.display)
-        # self.collision_objects.draw(self.camera.display)
+        self.render.draw_all()
 
 
 if __name__ == "__main__":

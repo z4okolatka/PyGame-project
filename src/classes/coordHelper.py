@@ -56,3 +56,11 @@ class FloatCords:
     @centery.setter
     def centery(self, n):
         self.y = n - self.rect.height / 2
+    
+    @property
+    def width(self):
+        return self.rect.width
+    
+    @property
+    def height(self):
+        return self.rect.height
