@@ -27,7 +27,7 @@ class Game:
                         (400, 100)),
             block.Block((200, 400),
                         (400, 100)),
-            block.Block((self.camera.display.get_width()//2, 650),
+            block.Block((self.camera.display.get_width() // 2, 650),
                         (300, 100)),
         ])
 
