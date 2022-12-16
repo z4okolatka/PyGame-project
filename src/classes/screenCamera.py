@@ -8,6 +8,7 @@ class ScreenCamera:
     def __init__(self, game):
         self.game: main.Game = game
 
+
         # main surface
         if settings.FULL_SCREEN:
             monitor = screeninfo.get_monitors()[0]

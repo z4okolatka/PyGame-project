@@ -63,7 +63,6 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
 
         self._lastKeyboard = kb
 
-
     def horizontal_movement(self, keyboard):
         if self.keydown(pg.K_d, keyboard) or self.keydown(pg.K_a, keyboard):
             self.vx = 0

@@ -2,6 +2,7 @@ import pygame as pg
 from src.classes import screenCamera
 from src.classes import player
 from src.classes import block
+from src.classes import render
 import src.setting as settings
 
 
@@ -15,8 +16,7 @@ class Game:
         self.deltatime = 1e-10
         self.camera = screenCamera.ScreenCamera(self)
         self.player = player.Player(self)
-        self.collision_objects = pg.sprite.Group()
-        self.collision_objects.add([
+        self.collision_objects = [
             block.Block((5, self.camera.display.get_height() / 2),
                         (10, self.camera.display.get_height())),
             block.Block((self.camera.display.get_width(
@@ -29,7 +29,9 @@ class Game:
                         (400, 100)),
             block.Block((self.camera.display.get_width() // 2, 650),
                         (300, 100)),
-        ])
+        ]
+
+        self.render = render.Render(self)
 
     def run(self):
         running = True
@@ -45,6 +47,10 @@ class Game:
             # drawing everything
             self.draw()
 
+            # render
+            self.render.update({'player': self.player,
+                                'collision_objects': self.collision_objects})
+
             # game loop
             pg.display.flip()
             self.deltatime = self.clock.tick(self.FPS) / 1000
@@ -57,8 +63,8 @@ class Game:
     def draw(self):
         self.camera.display.fill((50, 50, 50))
 
-        self.player.draw(self.camera.display)
-        self.collision_objects.draw(self.camera.display)
+        # self.player.draw(self.camera.display)
+        # self.collision_objects.draw(self.camera.display)
 
 
 if __name__ == "__main__":
