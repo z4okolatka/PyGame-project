@@ -35,6 +35,8 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
         self.max_vertical_speed = settings.PLAYER_MAX_VERTICAL_SPEED
         self.vertical_acceleration = settings.PLAYER_VERTICAL_ACCELERATION
         self.jump_speed = settings.PLAYER_JUMP_SPEED
+        self.max_jump_num = settings.PLAYER_MAX_JUMP_NUM
+        self.jump_num = self.max_jump_num
 
         # attributes
         self._lastKeyboard = pg.key.get_pressed()
@@ -101,9 +103,10 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
         self.rect.x = round(self.x)
 
     def vertical_movement(self, keyboard):
-        if self.keydown(pg.K_SPACE, keyboard):
+        if self.keydown(pg.K_SPACE, keyboard) and self.jump_num:
             self.vy = self.jump_speed * -1
-        self.vy += self.vertical_acceleration
+            self.jump_num -= 1
+        self.vy += self.vertical_acceleration * self.game.deltatime
 
     def normalize_vertical_speed(self):
         if abs(self.vy) >= self.max_vertical_speed * self.game.deltatime:
@@ -123,6 +126,7 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
                         abs(border_rect.bottom - sprite.rect.top) < abs(border_rect.top - sprite.rect.bottom):
                     self.vy = 0
                     self.bottom = sprite.rect.top
+                    self.jump_num = self.max_jump_num
                     break
                 elif border_rect.top <= sprite.rect.bottom and abs(self.vy) > 0:
                     self.vy = 0
