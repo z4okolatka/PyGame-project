@@ -12,18 +12,31 @@ class Render(coordHelper.FloatCords):
     def draw_all(self):
         self.draw(self.game.player)
         self.draw(self.game.collision_objects)
+    
+    def _draw_one_sprite(self, sprite):
+        w, h = sprite.rect.size
+        x, y = sprite.topleft
+
+        scale = self.game.camera.scale
+
+        # position
+        x -= self.game.camera.offset_x
+        y -= self.game.camera.offset_y
+
+        # size
+        x *= scale
+        y *= scale
+
+        # correcting position
+        camWidth, camHeight = self.game.camera.display.get_size()
+        x += camWidth * (1 - scale) / 2
+        y += camHeight * (1 - scale) / 2        
+
+        self.display.blit(pg.transform.scale_by(sprite.image, scale), (round(x), round(y), w, h))
 
     def draw(self, object_):
-        if isinstance(object_, Iterable):
-            for sprite in object_:
-                offset_rect = sprite.rect.copy()
-                offset_rect.x -= self.game.camera.offset_x
-                offset_rect.y -= self.game.camera.offset_y
-
-                self.display.blit(sprite.image, offset_rect)
-        else:
-            offset_rect = object_.rect.copy()
-            offset_rect.x -= self.game.camera.offset_x
-            offset_rect.y -= self.game.camera.offset_y
-
-            self.display.blit(object_.image, offset_rect)
+        if not isinstance(object_, Iterable):
+            object_ = [object_]
+        
+        for sprite in object_:
+            self._draw_one_sprite(sprite)

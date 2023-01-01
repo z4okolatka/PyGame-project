@@ -33,14 +33,23 @@ class ScreenCamera(FloatCords):
         pcx = self.game.player.centerx
         cx = self.offset_x + self.width / 2
         dx = pcx - cx
+        self.game.info.show('dx', dx)
 
-        self.offset_x += absmin(dx * 0.04,
-                                self.game.player.max_vx * self.game.deltatime)
+        if abs(dx) <= 1:
+            self.offset_x += dx
+        else:        
+            self.offset_x += absmin(
+                dx * 0.04,
+                self.game.player.max_vx * self.game.deltatime
+            )
 
     def handle_y_offset(self):
         pcy = self.game.player.centery
         cy = self.offset_y + self.height / 2
         dy = pcy - cy
+        self.game.info.show('dy', dy)
 
-        self.offset_y += absmin(dy * 0.06,
-                                self.game.player.max_vy * self.game.deltatime)
+        self.offset_y += absmin(
+            dy * 0.06,
+            self.game.player.max_vy * self.game.deltatime
+        )

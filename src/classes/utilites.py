@@ -1,13 +1,26 @@
 def absmax(min_, value):
     if not value:
-        return 0
+        return min_
     absolute = abs(value)
     sign = value / absolute
     return sign * max(min_, absolute)
 
+
 def absmin(value, max_):
     if not value:
-        return 0
+        return value
     absolute = abs(value)
     sign = value / absolute
     return sign * min(max_, absolute)
+
+
+def clamp(min_, value, max_):
+    return max(min_, min(value, max_))
+
+
+def absclamp(min_, value, max_):
+    if not value:
+        return value
+    absolute = abs(value)
+    sign = value / absolute
+    return sign * max(min_, min(value, max_))
