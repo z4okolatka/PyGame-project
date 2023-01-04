@@ -36,7 +36,8 @@ class Game:
         ]
         self.menu = menu.Menu(self, self.camera.display.get_size())
         self.render = render.Render(self)
-        self.info = infoDisplay.InformationDisplay(self, pg.font.Font(Path(__file__).parent / "src/fonts/PressStart.ttf", 20))
+        self.info = infoDisplay.InformationDisplay(self, pg.font.Font(
+            Path(__file__).parent / "src/fonts/PressStart.ttf", 20))
 
     def run(self):
         self.running = True
@@ -54,7 +55,8 @@ class Game:
                         self.camera.scale += .1
                     else:
                         self.camera.scale -= .1
-                    self.camera.scale = round(clamp(0.1, self.camera.scale, 2), 1)
+                    self.camera.scale = round(
+                        clamp(0.1, self.camera.scale, 2), 1)
                 if event.type == pg.WINDOWMOVED:
                     self.paused = True
 
@@ -74,13 +76,26 @@ class Game:
         pg.quit()
 
     def update(self):
-        # pg.mouse.set_visible(self.paused)
         if not self.paused:
             self.update_game()
         else:
             self.update_menu()
 
     def update_game(self):
+        # temporary creating platforms
+        for event in self.events:
+            if event.type == pg.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    camWidth, camHeight = self.camera.display.get_size()
+                    scale = self.camera.scale
+                    self.collision_objects.append(
+                        block.Block((
+                            self.camera.x +
+                            (event.pos[0] - camWidth * (1 - scale) / 2) / scale,
+                            self.camera.y +
+                            (event.pos[1] - camHeight * (1 - scale) / 2) / scale
+                        ),
+                            (200, 30)))
         self.player.update()
         self.camera.follow_player()
 

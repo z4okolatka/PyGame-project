@@ -1,17 +1,19 @@
 import pygame as pg
 import src.setting as settings
 from src.classes import coordHelper
+from src.classes import animation
+from pathlib import Path
 import main
 
 
-class Player(pg.sprite.Sprite, coordHelper.FloatCords):
+class Player(pg.sprite.Sprite, coordHelper.FloatCords, animation.Animation):
     def __init__(self, game, cords=None):
         super().__init__()
         self.game: main.Game = game
 
-        # surface
-        self.image = pg.Surface((80, 160))
-        self.image.fill((255, 255, 255))
+        # image and rect
+        animation.Animation.__init__(self, Path.cwd() / 'src/sprites/player.gif')
+        self.image: pg.Surface
         self.rect = self.image.get_rect()
 
         # float coordinates
@@ -63,6 +65,12 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
 
         self._lastKeyboard = kb
 
+        # animation of sprite
+        self.animationTime += self.game.deltatime * 1000
+        # if self.image.get_at((0, 0)) == pg.Color(255, 255, 255):
+        #     self.game.paused = True
+        #     print(self.animationFrameIndex)
+
     def horizontal_movement(self, keyboard):
         if self.keydown(pg.K_d, keyboard) or self.keydown(pg.K_a, keyboard):
             self.vx = 0
@@ -90,6 +98,11 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
     def horizontal_collision(self):
         for sprite in self.game.collision_objects:
             if sprite.rect.colliderect(self.rect):
+                # climbing on small ledges
+                if self.rect.bottom - sprite.rect.top <= 20 and abs(self.vy) <= 300:
+                    self.bottom = sprite.rect.top
+                    break
+
                 if self.rect.centerx <= sprite.rect.centerx and self.vx > 0:
                     self.right = sprite.rect.left
                     self.vx = 0
@@ -129,6 +142,3 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
                 break
 
         self.rect.y = round(self.y)
-
-    def draw(self, surface):
-        surface.blit(self.image, self.rect)

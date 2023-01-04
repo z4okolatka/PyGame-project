@@ -22,8 +22,8 @@ class ScreenCamera(FloatCords):
 
         # attributes
         self.scale = 1
-        self.offset_x = 0
-        self.offset_y = 0
+        self.x = 0
+        self.y = 0
 
     def follow_player(self):
         self.handle_x_offset()
@@ -31,25 +31,15 @@ class ScreenCamera(FloatCords):
 
     def handle_x_offset(self):
         pcx = self.game.player.centerx
-        cx = self.offset_x + self.width / 2
-        dx = pcx - cx
-        self.game.info.show('dx', dx)
+        dx = pcx - self.centerx
 
-        if abs(dx) <= 1:
-            self.offset_x += dx
-        else:        
-            self.offset_x += absmin(
-                dx * 0.04,
-                self.game.player.max_vx * self.game.deltatime
-            )
+        if abs(dx) > 1:
+            dx = dx * self.game.deltatime * 3.2
+        self.x += dx
 
     def handle_y_offset(self):
         pcy = self.game.player.centery
-        cy = self.offset_y + self.height / 2
+        cy = self.centery
         dy = pcy - cy
-        self.game.info.show('dy', dy)
 
-        self.offset_y += absmin(
-            dy * 0.06,
-            self.game.player.max_vy * self.game.deltatime
-        )
+        self.y += dy * self.game.deltatime * 5.2
