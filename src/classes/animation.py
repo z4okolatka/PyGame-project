@@ -21,7 +21,7 @@ class Animation:
             mode = imageSequence.mode
             size = imageSequence.size
             data = imageSequence.tobytes()
-            self.images.append((pg.image.frombytes(
+            self.images.append((pg.image.fromstring(
                 data, size, mode).convert_alpha(), imageSequence.info['duration']))
 
     @property

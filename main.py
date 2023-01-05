@@ -5,6 +5,8 @@ from src.classes import block
 from src.classes import render
 from src.classes import menu
 from src.classes import infoDisplay
+from src.classes import coordHelper
+from src.classes import roomBarrier
 from src.classes.utilites import *
 from pathlib import Path
 import src.setting as settings
@@ -24,15 +26,25 @@ class Game:
         # objects and object gorups
         self.camera = screenCamera.ScreenCamera(self)
         self.player = player.Player(self)
+        self.barriers: dict[str: roomBarrier.Barrier] = {
+            'left': roomBarrier.Barrier(
+                (-self.camera.width, self.camera.centery), (5, self.camera.height * 3)),
+            'right': roomBarrier.Barrier(
+                (self.camera.width * 2, self.camera.centery), (5, self.camera.height * 3)),
+            'top': roomBarrier.Barrier(
+                (self.camera.width / 2, -self.camera.centery * 2), (self.camera.width * 3, 5)),
+            'bottom': roomBarrier.Barrier(
+                (self.camera.width / 2, self.camera.centery * 4), (self.camera.width * 3, 5))
+        }
         self.collision_objects = [
-            block.Block((self.camera.display.get_width() // 2, self.camera.display.get_height() - 5),
-                        (self.camera.display.get_width() * 5, 10)),
-            block.Block((self.camera.display.get_width() - 200, 400),
-                        (400, 100)),
-            block.Block((200, 400),
-                        (400, 100)),
-            block.Block((self.camera.display.get_width() // 2, 650),
-                        (300, 100)),
+            block.Block(
+                (-self.camera.width, self.camera.centery), (5, self.camera.height * 3)),
+            block.Block(
+                (self.camera.width * 2, self.camera.centery), (5, self.camera.height * 3)),
+            block.Block(
+                (self.camera.width / 2, -self.camera.centery * 2), (self.camera.width * 3, 5)),
+            block.Block(
+                (self.camera.width / 2, self.camera.centery * 4), (self.camera.width * 3, 5))
         ]
         self.menu = menu.Menu(self, self.camera.display.get_size())
         self.render = render.Render(self)
@@ -52,11 +64,11 @@ class Game:
                         self.paused = not self.paused
                 if event.type == pg.MOUSEWHEEL:
                     if event.y > 0:
-                        self.camera.scale += .1
+                        self.camera.scale = round(
+                            clamp(0.5, self.camera._scale + .1, 2), 1)
                     else:
-                        self.camera.scale -= .1
-                    self.camera.scale = round(
-                        clamp(0.1, self.camera.scale, 2), 1)
+                        self.camera.scale = round(
+                            clamp(0.5, self.camera._scale - .1, 2), 1)
                 if event.type == pg.WINDOWMOVED:
                     self.paused = True
 
@@ -85,17 +97,13 @@ class Game:
         # temporary creating platforms
         for event in self.events:
             if event.type == pg.MOUSEBUTTONDOWN:
+                pos = (self.camera.x + event.pos[0] / self.camera.scale,
+                       self.camera.y + event.pos[1] / self.camera.scale)
                 if event.button == 1:
-                    camWidth, camHeight = self.camera.display.get_size()
-                    scale = self.camera.scale
                     self.collision_objects.append(
-                        block.Block((
-                            self.camera.x +
-                            (event.pos[0] - camWidth * (1 - scale) / 2) / scale,
-                            self.camera.y +
-                            (event.pos[1] - camHeight * (1 - scale) / 2) / scale
-                        ),
-                            (200, 30)))
+                        block.Block(pos, (200, 30)))
+                if event.button == 3:
+                    self.player.center = pos
         self.player.update()
         self.camera.follow_player()
 
@@ -105,6 +113,7 @@ class Game:
     def draw_game(self):
         self.camera.display.fill((50, 50, 50))
         self.render.draw_all()
+        self.render.draw(self.barriers.values())
 
     def draw_menu(self):
         self.menu.draw(self.camera.display)

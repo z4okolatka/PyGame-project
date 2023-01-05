@@ -67,9 +67,6 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords, animation.Animation):
 
         # animation of sprite
         self.animationTime += self.game.deltatime * 1000
-        # if self.image.get_at((0, 0)) == pg.Color(255, 255, 255):
-        #     self.game.paused = True
-        #     print(self.animationFrameIndex)
 
     def horizontal_movement(self, keyboard):
         if self.keydown(pg.K_d, keyboard) or self.keydown(pg.K_a, keyboard):
