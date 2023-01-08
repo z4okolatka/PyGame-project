@@ -1,11 +1,9 @@
 import pygame as pg
-from src.classes import room
-from src.classes.trigger import Trigger
+from src.classes.mapPack import room, trigger
 
-
-class Door(Trigger):
-    def __init__(self, game, centerpos, size, start_room_pos):
-        super().__init__(game, centerpos, size)
+class Door(trigger.Trigger):
+    def __init__(self, centerpos, size, start_room_pos):
+        super().__init__(centerpos, size)
         self.start_room_pos = start_room_pos
 
     def action(self):

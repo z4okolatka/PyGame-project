@@ -1,11 +1,11 @@
 import pygame as pg
-from src.classes.collidableObject import CollidableObject
+from src.classes.mapPack import collidableObject
 
 
-class Block(pg.sprite.Sprite, CollidableObject):
+class Block(pg.sprite.Sprite, collidableObject.CollidableObject):
     def __init__(self, centerpos, size):
         super().__init__()
-        CollidableObject.__init__(self)
+        collidableObject.CollidableObject.__init__(self)
 
         self.image = pg.Surface(size)
         self.image.fill('white')

@@ -1,13 +1,13 @@
 import pygame as pg
 from pathlib import Path
-import src.classes.menu as Menu
+from src.classes.menuPack import menu as Menu
 
 
 pg.init()
 
 
 class Button:
-    def __init__(self, menu, text, font=pg.font.Font(Path(__file__).parent.parent / "fonts/PressStart.ttf", 36), basecolor=(255, 255, 255), hovercolor=(150, 150, 150), size=(100, 50)):
+    def __init__(self, menu, text, font=pg.font.Font(Path.cwd() / "src/fonts/PressStart.ttf", 36), basecolor=(255, 255, 255), hovercolor=(150, 150, 150), size=(100, 50)):
         self.menu: Menu.Menu = menu
 
         self.text = text

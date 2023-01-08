@@ -1,9 +1,9 @@
 import pygame as pg
 import src.setting as settings
-from src.classes import coordHelper
-from src.classes import animation
-from src.classes.collidableObject import CollidableObject
-from src.classes.inventory import Inventory
+from src.classes.utilsPack import coordHelper
+from src.classes.playerPack import inventory
+from src.classes.mapPack import collidableObject
+from src.classes.utilsPack.utilites import *
 from pathlib import Path
 import main
 
@@ -12,7 +12,7 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
     def __init__(self, game, cords=None):
         super().__init__()
         self.game: main.Game = game
-        self.inventory = Inventory(self.game)
+        self.inventory = inventory.Inventory(self.game)
 
         # image and rect
         # animation.Animation.__init__(self, Path.cwd() / 'src/sprites/player.gif')
@@ -105,7 +105,7 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
             self.facing = 'left'
 
     def horizontal_collision(self):
-        for sprite in CollidableObject.get_collided(self):
+        for sprite in collidableObject.CollidableObject.get_collided(self):
             # climbing on small ledges
             if self.rect.bottom - sprite.rect.top <= 20 and abs(self.vy) <= 300:
                 self.bottom = sprite.rect.top
@@ -136,7 +136,7 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
         self.rect.y = round(self.y)
 
     def vertical_collision(self):
-        for sprite in CollidableObject.get_collided(self):
+        for sprite in collidableObject.CollidableObject.get_collided(self):
             if self.rect.centery < sprite.rect.centery and self.vy > 0:
                 self.vy = 0
                 self.bottom = sprite.rect.top
@@ -158,3 +158,9 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
 
         self._facing = direction
         self.image = pg.transform.flip(self.image, True, False)
+
+    def room_in(self):
+        for room in self.game.rooms:
+            if self.rect.colliderect(room.room_area):
+                return room
+

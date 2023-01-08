@@ -1,5 +1,5 @@
 import pygame as pg
-from src.classes.menuButton import Button
+from src.classes.menuPack.menuButton import Button
 import main
 
 

@@ -1,6 +1,6 @@
 import pygame as pg
 from collections import OrderedDict
-from src.classes.coordHelper import FloatCords
+from src.classes.utilsPack.coordHelper import FloatCords
 import main
 
 

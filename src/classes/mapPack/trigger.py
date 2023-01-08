@@ -1,5 +1,6 @@
 import pygame as pg
-from src.classes import coordHelper
+from src.classes.utilsPack import coordHelper
+import weakref
 import main
 
 
@@ -7,23 +8,38 @@ class Trigger(pg.sprite.Sprite, coordHelper.FloatCords):
     __refs__ = []
 
     @classmethod
+    def init_game(cls, game):
+        cls.game = game
+
+    @classmethod
     def get_refs(cls):
-        return cls.__refs__
+        for obj in cls.__refs__:
+            inst_obj = obj()
+            if inst_obj is None:
+                cls.__refs__.remove(obj)
+                continue
+            yield inst_obj
 
     @classmethod
     def get_triggered(cls):
-        return list(trigger for trigger in cls.__refs__ if trigger.is_triggering())
+        for obj in cls.__refs__:
+            inst_obj = obj()
+            if inst_obj is None:
+                cls.__refs__.remove(obj)
+                continue
+            if inst_obj.is_triggering():
+                yield inst_obj
     
     @classmethod
     def activate_triggered(cls):
         for trigger in cls.get_triggered():
             trigger.activate()
 
-    def __init__(self, game, centerpos, size):
+    def __init__(self, centerpos, size):
         super().__init__()
-        Trigger.__refs__.append(self)
+        Trigger.__refs__.append(weakref.ref(self))
 
-        self.game: main.Game = game
+        self.game = Trigger.game
         self.player = self.game.player
 
         self.image = pg.Surface(size)
@@ -39,13 +55,6 @@ class Trigger(pg.sprite.Sprite, coordHelper.FloatCords):
 
     def activate(self):
         self.action()
-        try:
-            Trigger.__refs__.remove(self)
-        except:
-            pass
-    
-    def destroy(self):
-        Trigger.__refs__.remove(self)
 
     def action(self):
         pass

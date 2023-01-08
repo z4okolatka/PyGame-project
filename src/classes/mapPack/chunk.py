@@ -1,6 +1,6 @@
 import src.setting
-from src.classes.block import Block
-from src.classes.door import Door
+from src.classes.mapPack.block import Block
+from src.classes.mapPack import door
 import main
 
 
@@ -22,13 +22,19 @@ class Chunk:
         '''
         self.game: main.Game = game
         self.blocks = []
+        self.doors = []
         self.doors_start_pos = [None, None, None, None]
         self.generate_chunk()
-        # print('Chunk generated')
+
+    def delete_blocks(self):
+        for block in self.blocks:
+            try:
+                block.destroy()
+            except:
+                pass
 
     def generate_chunk(self):
-        self.blocks = []
-        # Block((self.x * self.size, self.y * self.size), (10, 10))
+        self.delete_blocks()
         if self.type[0] == 1:
             self.blocks.append(
                 Block((self.x * self.size, self.y * self.size - self.size // 2), (self.size, 10)))
@@ -56,7 +62,9 @@ class Chunk:
         if self.type[2] == 1:
             self.blocks.append(
                 Block((self.x * self.size, self.y * self.size + self.size // 2), (self.size, 10)))
-
+        elif self.type[2] == 2:
+            self.blocks.append(
+                Block((self.x * self.size, self.y * self.size), (100, 30)))
         elif self.type[2] == 3:
             self.blocks.append(
                 Block((self.x * self.size - self.out_door_size // 2 - ((self.size - self.out_door_size) // 4),
@@ -79,14 +87,18 @@ class Chunk:
                       (10, (self.size - self.out_door_size) // 2)))
         # print(self.doors_start_pos)
         if self.doors_start_pos[0] is not None:
-                Door(self.game, (self.x * self.size, self.y * self.size - self.size // 2), (self.out_door_size, 10),
-                     self.doors_start_pos[0])
+            self.doors.append(
+            door.Door((self.x * self.size, self.y * self.size - self.size // 2), (self.out_door_size, 10),
+                 self.doors_start_pos[0]))
         if self.doors_start_pos[1] is not None:
-                Door(self.game, (self.x * self.size + self.size // 2, self.y * self.size), (10, self.out_door_size),
-                     self.doors_start_pos[1])
+            self.doors.append(
+            door.Door((self.x * self.size + self.size // 2, self.y * self.size), (10, self.out_door_size),
+                 self.doors_start_pos[1]))
         if self.doors_start_pos[2] is not None:
-                Door(self.game, (self.x * self.size, self.y * self.size + self.size // 2), (self.out_door_size, 10),
-                     self.doors_start_pos[2])
+            self.doors.append(
+            door.Door((self.x * self.size, self.y * self.size + self.size // 2), (self.out_door_size, 10),
+                 self.doors_start_pos[2]))
         if self.doors_start_pos[3] is not None:
-                Door(self.game, (self.x * self.size - self.size // 2, self.y * self.size), (10, self.out_door_size),
-                     self.doors_start_pos[3])
+            self.doors.append(
+            door.Door((self.x * self.size - self.size // 2, self.y * self.size), (10, self.out_door_size),
+                 self.doors_start_pos[3]))

@@ -1,8 +1,8 @@
 import pygame as pg
 import screeninfo
 import src.setting as settings
-from src.classes.utilites import *
-from src.classes.coordHelper import FloatCords
+from src.classes.utilsPack.utilites import *
+from src.classes.utilsPack.coordHelper import FloatCords
 import main
 
 
@@ -58,9 +58,9 @@ class ScreenCamera(FloatCords):
     def follow_player(self):
         self.smooth_zoom()
         self.move_x()
-        #self.horizontal_collision()
+        self.horizontal_collision()
         self.move_y()
-       # self.vertical_collision()
+        self.vertical_collision()
 
     def smooth_zoom(self):
         self.game.info.show('scale', self.scale)
@@ -85,7 +85,10 @@ class ScreenCamera(FloatCords):
 
     def horizontal_collision(self):
         # prevent camera move outside left and right boundaries
-        boundaries = self.game.boundaries
+        try:
+            boundaries = self.game.player.room_in().boundaries
+        except:
+            return
         overlap = self.width / 3
         if self.left - 1 + overlap <= boundaries['left'].right:
             self.left = boundaries['left'].right - overlap
@@ -102,7 +105,10 @@ class ScreenCamera(FloatCords):
 
     def vertical_collision(self):
         # prevent camera move outside top and bottom boundaries
-        boundaries = self.game.boundaries
+        try:
+            boundaries = self.game.player.room_in().boundaries
+        except:
+            return
         overlap = self.height / 3
         if self.top - 1 + overlap <= boundaries['top'].bottom:
             self.top = boundaries['top'].bottom - overlap

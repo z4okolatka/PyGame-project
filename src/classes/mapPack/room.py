@@ -1,10 +1,13 @@
 import main
-from src.classes.block import Block
-from src.classes.chunk import Chunk
-from src.classes.trigger import Trigger
-from src.classes.collidableObject import CollidableObject
+from src.classes.mapPack.block import Block
+from src.classes.mapPack.chunk import Chunk
+from src.classes.mapPack.trigger import Trigger
+from src.classes.mapPack.roomBarrier import Barrier
+from src.classes.mapPack.collidableObject import CollidableObject
+from src import setting
 
 from random import randint
+import pygame as pg
 
 
 class Room:
@@ -20,8 +23,10 @@ class Room:
         self.game: main.Game = game
         self.max_chunks = 10
         self.min_chunks = 3
+        self.chunk_size = setting.CHUNK_SIZE
         self.n_chunks = 0
         self.generate_room()
+
         # print('Room generated')
 
     def next_chunk_is_free(self, direction, pos):
@@ -32,7 +37,7 @@ class Room:
             (-1, 0)  # left
         ]
 
-        x, y = pos[0] + new_chunk[direction][0],\
+        x, y = pos[0] + new_chunk[direction][0], \
             pos[1] + new_chunk[direction][1]
         is_free = True
         for room in self.game.rooms:
@@ -121,8 +126,9 @@ class Room:
                 Chunk(self.game, (0, 1), (2, 2, 1, 3)),
                 Chunk(self.game, (1, 1), (2, 1, 1, 2))
             ])
+            self.generate_room_barrier()
             return
-        
+
         continue_generate = True
         post_chunks = []
         # old_chunk = [(0, 1, (0, 0, 2, 0), 0),
@@ -172,6 +178,40 @@ class Room:
 
         # post generate
         self.post_generate_chunks(self.new_chunks + post_chunks)
+
+        self.generate_room_barrier()
+
+    def generate_room_barrier(self):
+        max_x, max_y = 0, 0
+        min_x, min_y = 10 ** 10, 10 ** 10
+        for chunk in self.chunks:
+            if chunk.x < min_x:
+                min_x = chunk.x
+            if chunk.x > max_x:
+                max_x = chunk.x
+            if chunk.y < min_y:
+                min_y = chunk.y
+            if chunk.y > max_y:
+                max_y = chunk.y
+
+        min_x -= .5
+        max_x += .5
+        min_y -= .5
+        max_y += .5
+
+        self.boundaries = {
+            'left': Barrier(
+                (min_x * self.chunk_size, min_y * self.chunk_size), (5, (max_y - min_y) * self.chunk_size)),
+            'right': Barrier(
+                (max_x * self.chunk_size, min_y * self.chunk_size), (5, (max_y - min_y) * self.chunk_size)),
+            'top': Barrier(
+                (min_x * self.chunk_size, min_y * self.chunk_size), ((max_x - min_x) * self.chunk_size, 5)),
+            'bottom': Barrier(
+                (min_x * self.chunk_size, max_y * self.chunk_size), ((max_x - min_x) * self.chunk_size, 5))
+        }
+
+        self.room_area = pg.Rect((min_x * self.chunk_size, min_y * self.chunk_size,
+                                  (max_x - min_x) * self.chunk_size, (max_y - min_y) * self.chunk_size))
 
     def close_room(self):
         next_chunk = [(0, -1, (0, 0, 2, 0), 2),
@@ -229,7 +269,8 @@ class Room:
                 if door_pos is not None:
                     for door in Trigger.get_refs():
                         if door.start_room_pos == door_pos:
-                            door.destroy()
+                            if door in chunk.doors:
+                                chunk.doors.remove(door)
                     for cord in self.game.new_rooms_cords:
                         if cord[0] == door_pos:
                             del self.game.new_rooms_cords[self.game.new_rooms_cords.index(

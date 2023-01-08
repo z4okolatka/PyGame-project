@@ -1,17 +1,10 @@
 import pygame as pg
-from src.classes import screenCamera
-from src.classes import player
-from src.classes import block
-from src.classes import render
-from src.classes import menu
-from src.classes import interface
-from src.classes import infoDisplay
-from src.classes import roomBarrier
-from src.classes import collidableObject
-from src.classes import room
-from src.classes import trigger
-from src.classes import door
-from src.classes.utilites import *
+from src.classes.renderPack import screenCamera, render
+from src.classes.playerPack import player, interface
+from src.classes.mapPack import door, room, roomBarrier, block, trigger
+from src.classes.menuPack import menu
+from src.classes.utilsPack import infoDisplay
+from src.classes.utilsPack.utilites import *
 from pathlib import Path
 import src.setting as settings
 
@@ -19,6 +12,7 @@ import src.setting as settings
 class Game:
     def __init__(self):
         pg.init()
+        trigger.Trigger.init_game(self)
 
         self.FPS = settings.FPS
         self.clock = pg.time.Clock()
@@ -41,12 +35,6 @@ class Game:
             'bottom': roomBarrier.Barrier(
                 (self.camera.width / 2, self.camera.centery * 4), (self.camera.width * 3, 5))
         }
-        # self.collidableObjects = [
-        #     block.Block((0.0, -250.0), (50, 50), 'red'),
-        #     block.Block((-250.0, 0.0), (50, 50), 'red'),
-        #     block.Block((500.0, -250.0), (50, 50), 'red'),
-        #     block.Block((750.0, 0.0), (50, 50), 'red'),
-        # ]
         self.menu = menu.Menu(self, self.camera.display.get_size())
         self.render = render.Render(self)
         self.ui = interface.UI(self)
@@ -57,7 +45,7 @@ class Game:
         self.rooms = []
         self.rooms.append(room.Room(self, None, None, start_room=True))
         self.new_rooms_cords = [((-1, 1), (0, 3, 0, 0))]
-        door.Door(self, (-100, 100), (20, 20), (-1, 1))
+        list(i for i in self.rooms[0].chunks if i.x == 0 and i.y == 1)[0].doors.append(door.Door((-100, 100), (20, 20), (-1, 1)))
 
     def run(self):
         self.running = True

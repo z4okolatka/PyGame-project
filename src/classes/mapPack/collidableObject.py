@@ -1,4 +1,4 @@
-from src.classes import coordHelper
+from src.classes.utilsPack import coordHelper
 import weakref
 
 
@@ -7,7 +7,12 @@ class CollidableObject(coordHelper.FloatCords):
 
     @classmethod
     def get_refs(cls):
-        return cls.__refs__
+        for obj in cls.__refs__:
+            inst_obj = obj()
+            if inst_obj is None:
+                cls.__refs__.remove(obj)
+                continue
+            yield inst_obj
     
     @classmethod
     def get_collided(cls, sprite):
