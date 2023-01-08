@@ -1,7 +1,8 @@
 import pygame as pg
+from PIL import Image
 from src.classes.renderPack import screenCamera, render
 from src.classes.playerPack import player, interface
-from src.classes.mapPack import door, room, roomBarrier, block, trigger
+from src.classes.mapPack import door, room, roomBarrier, block, trigger, accessory
 from src.classes.menuPack import menu
 from src.classes.utilsPack import infoDisplay
 from src.classes.utilsPack.utilites import *
@@ -20,10 +21,12 @@ class Game:
         # attributes
         self.deltatime = 1e-10
         self.paused = False
-        self.list = []
 
         # objects and object gorups
+        self.list = []
+        self.items = []
         self.camera = screenCamera.ScreenCamera(self)
+        self.load_sprites()
         self.player = player.Player(self)
         self.boundaries: dict[str: roomBarrier.Barrier] = {
             'left': roomBarrier.Barrier(
@@ -78,9 +81,19 @@ class Game:
             # game loop
             pg.display.flip()
             self.deltatime = self.clock.tick(self.FPS) / 1000
-            self.info.show('fps', self.clock.get_fps(), .01)
+            self.info.show(None, round(self.clock.get_fps()), .01)
 
         pg.quit()
+    
+    def load_sprites(self):
+        self.items_images = {}
+        sprite_path = Path.cwd() / 'src/sprites'
+        for t in ('nimb',):
+            path = sprite_path / t
+            images = path.glob('*.png')
+            with open(path / 'durations.txt', 'r') as file:
+                durations = list(map(int, file.readlines()))
+            self.items_images[t] = list([(pg.image.load(image).convert_alpha(), durations[i]) for i, image in enumerate(images)])
 
     def update(self):
         if not self.paused:
@@ -105,11 +118,13 @@ class Game:
                 pos = (self.camera.x + event.pos[0] / self.camera.scale,
                        self.camera.y + event.pos[1] / self.camera.scale)
                 if event.button == 1:
-                    block.Block(pos, (100, 10))
+                    self.items.append(accessory.Accessory(self, pos, 'nimb'))
                 if event.button == 3:
                     self.player.center = pos
         self.player.update()
         self.camera.follow_player()
+        for i in self.items:
+            i.update()
         trigger.Trigger.activate_triggered()
 
     def update_menu(self):

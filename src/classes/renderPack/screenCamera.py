@@ -58,13 +58,11 @@ class ScreenCamera(FloatCords):
     def follow_player(self):
         self.smooth_zoom()
         self.move_x()
-        self.horizontal_collision()
+        # self.horizontal_collision()
         self.move_y()
-        self.vertical_collision()
+        # self.vertical_collision()
 
     def smooth_zoom(self):
-        self.game.info.show('scale', self.scale)
-        self.game.info.show('sm_scale', self.smooth_scale)
         if not self.smooth_scale:
             return
         sign = self.smooth_scale / abs(self.smooth_scale)

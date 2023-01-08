@@ -35,15 +35,18 @@ class Trigger(pg.sprite.Sprite, coordHelper.FloatCords):
         for trigger in cls.get_triggered():
             trigger.activate()
 
-    def __init__(self, centerpos, size):
+    def __init__(self, centerpos, size, fill=False):
         super().__init__()
         Trigger.__refs__.append(weakref.ref(self))
 
         self.game = Trigger.game
         self.player = self.game.player
 
-        self.image = pg.Surface(size)
-        self.image.fill('red')
+        if fill:
+            self.image = pg.Surface(size)
+            self.image.fill('red')
+        else:
+            self.image = pg.Surface(size, pg.SRCALPHA)
         self.rect = self.image.get_rect()
 
         self.rect.center = centerpos

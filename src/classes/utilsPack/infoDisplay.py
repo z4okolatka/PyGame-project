@@ -11,6 +11,7 @@ class Data:
         self.next = value
         self.time = 0
         self.dt = deltatime
+        self.prefix = f'{self.key} = ' if key is not None else ''
     
     def getV(self):
         self.time += self.game.deltatime
@@ -18,8 +19,8 @@ class Data:
             self.time = 0
             value = self.value
             self.value = self.next
-            return f'{self.key} = {value}'
-        return f'{self.key} = {self.value}'
+            return f'{self.prefix}{value}'
+        return f'{self.prefix}{self.value}'
 
     
     def setV(self, value):

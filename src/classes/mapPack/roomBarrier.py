@@ -5,6 +5,7 @@ import src.classes.utilsPack.coordHelper as coordHelper
 class Barrier(coordHelper.FloatCords):
     def __init__(self, topleft, size):
         super().__init__()
+        return
 
         self.image = pg.Surface(size)
         self.image.fill('red')
