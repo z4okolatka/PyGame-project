@@ -8,6 +8,9 @@ from src.classes import interface
 from src.classes import infoDisplay
 from src.classes import roomBarrier
 from src.classes import objects
+from src.classes import room
+from src.classes import trigger
+from src.classes import door
 from src.classes.utilites import *
 from pathlib import Path
 import src.setting as settings
@@ -28,30 +31,41 @@ class Game:
         self.camera = screenCamera.ScreenCamera(self)
         self.player = player.Player(self)
         self.boundaries: dict[str: roomBarrier.Barrier] = {
-            'left': roomBarrier.Barrier(
-                (-self.camera.width, self.camera.centery), (5, self.camera.height * 3)),
-            'right': roomBarrier.Barrier(
-                (self.camera.width * 2, self.camera.centery), (5, self.camera.height * 3)),
-            'top': roomBarrier.Barrier(
-                (self.camera.width / 2, -self.camera.centery * 2), (self.camera.width * 3, 5)),
-            'bottom': roomBarrier.Barrier(
-                (self.camera.width / 2, self.camera.centery * 4), (self.camera.width * 3, 5))
-        }
-        [
-            block.Block(
-                (-self.camera.width, self.camera.centery), (5, self.camera.height * 3)),
-            block.Block(
-                (self.camera.width * 2, self.camera.centery), (5, self.camera.height * 3)),
-            block.Block(
-                (self.camera.width / 2, -self.camera.centery * 2), (self.camera.width * 3, 5)),
-            block.Block(
-                (self.camera.width / 2, self.camera.centery * 4), (self.camera.width * 3, 5))
-        ]
+           'left': roomBarrier.Barrier(
+               (-self.camera.width, self.camera.centery), (5, self.camera.height * 3)),
+           'right': roomBarrier.Barrier(
+               (self.camera.width * 2, self.camera.centery), (5, self.camera.height * 3)),
+           'top': roomBarrier.Barrier(
+               (self.camera.width / 2, -self.camera.centery * 2), (self.camera.width * 3, 5)),
+           'bottom': roomBarrier.Barrier(
+               (self.camera.width / 2, self.camera.centery * 4), (self.camera.width * 3, 5))
+       }
+        #[
+        #    block.Block(
+        #        (-self.camera.width, self.camera.centery), (5, self.camera.height * 3)),
+        #    block.Block(
+        #        (self.camera.width * 2, self.camera.centery), (5, self.camera.height * 3)),
+        #    block.Block(
+        #        (self.camera.width / 2, -self.camera.centery * 2), (self.camera.width * 3, 5)),
+        #    block.Block(
+        #        (self.camera.width / 2, self.camera.centery * 4), (self.camera.width * 3, 5))
+        #]
         self.menu = menu.Menu(self, self.camera.display.get_size())
         self.render = render.Render(self)
         self.ui = interface.UI(self)
         self.info = infoDisplay.InformationDisplay(self, pg.font.Font(
             Path(__file__).parent / "src/fonts/PressStart.ttf", 20))
+
+        # starting room
+        self.rooms = []
+        self.rooms.append(room.Room(self, None, None, start_room=True))
+
+        # rooms
+        self.new_rooms_cords = [((-1, 1), (0, 3, 0, 0))]
+
+        # triggers
+        self.triggers = []
+        self.triggers.append(door.Door(self, (-100, 100), (20, 20), (-1, 1)))
 
     def run(self):
         self.running = True
@@ -96,6 +110,7 @@ class Game:
 
     def update_game(self):
         # temporary creating platforms
+
         for event in self.events:
             if event.type == pg.MOUSEBUTTONDOWN:
                 pos = (self.camera.x + event.pos[0] / self.camera.scale,
@@ -106,6 +121,8 @@ class Game:
                     self.player.center = pos
         self.player.update()
         self.camera.follow_player()
+        [trigger_.update() for trigger_ in self.triggers]
+        # print(self.rooms)
 
     def update_menu(self):
         self.menu.update()

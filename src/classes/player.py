@@ -50,7 +50,7 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
 
         # attributes
         self._lastKeyboard = pg.key.get_pressed()
-        self.max_zoom_out = .5
+        self.max_zoom_out = .2
 
     def keydown(self, key, pressed):
         """Returns true if key was just pressed"""
