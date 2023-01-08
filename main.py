@@ -4,6 +4,7 @@ from src.classes import player
 from src.classes import block
 from src.classes import render
 from src.classes import menu
+from src.classes import interface
 from src.classes import infoDisplay
 from src.classes import roomBarrier
 from src.classes import objects
@@ -48,6 +49,7 @@ class Game:
         ]
         self.menu = menu.Menu(self, self.camera.display.get_size())
         self.render = render.Render(self)
+        self.ui = interface.UI(self)
         self.info = infoDisplay.InformationDisplay(self, pg.font.Font(
             Path(__file__).parent / "src/fonts/PressStart.ttf", 20))
 
@@ -99,7 +101,7 @@ class Game:
                 pos = (self.camera.x + event.pos[0] / self.camera.scale,
                        self.camera.y + event.pos[1] / self.camera.scale)
                 if event.button == 1:
-                    block.Block(pos, (200, 30))
+                    objects.Ring(self, pos)
                 if event.button == 3:
                     self.player.center = pos
         self.player.update()
@@ -111,7 +113,7 @@ class Game:
     def draw_game(self):
         self.camera.display.fill((50, 50, 50))
         self.render.draw_all()
-        self.render.draw(self.boundaries.values())
+        self.ui.draw_all()
 
     def draw_menu(self):
         self.menu.draw(self.camera.display)

@@ -1,6 +1,6 @@
 import pygame as pg
 from collections.abc import Iterable
-from src.classes.objects import collidableObject
+from src.classes.objects import collidableObject, Trigger
 from src.classes.utilites import *
 import main
 
@@ -13,6 +13,8 @@ class Render():
     def draw_all(self):
         self.draw(self.game.player)
         self.draw(collidableObject.get_refs())
+        self.draw(Trigger.get_refs())
+        self.draw(self.game.boundaries.values())
 
     def _draw_one_sprite(self, sprite):
         w, h = sprite.rect.size

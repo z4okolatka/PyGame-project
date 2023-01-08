@@ -2,7 +2,8 @@ import pygame as pg
 import src.setting as settings
 from src.classes import coordHelper
 from src.classes import animation
-from src.classes.objects import collidableObject
+from src.classes.objects import collidableObject, Trigger
+from src.classes.inventory import Inventory
 from pathlib import Path
 import main
 
@@ -11,6 +12,7 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
     def __init__(self, game, cords=None):
         super().__init__()
         self.game: main.Game = game
+        self.inventory = Inventory(self.game)
 
         # image and rect
         # animation.Animation.__init__(self, Path.cwd() / 'src/sprites/player.gif')
@@ -55,6 +57,7 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
         return (not self._lastKeyboard[key]) and pressed[key]
 
     def update(self):
+        # movement
         # keyboard input
         kb = pg.key.get_pressed()
 
@@ -70,6 +73,10 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
         self.vertical_collision()
 
         self._lastKeyboard = kb
+
+
+        # items
+        print(Trigger.get_triggered())
 
     def horizontal_movement(self, keyboard):
         if self.keydown(pg.K_d, keyboard) or self.keydown(pg.K_a, keyboard):
