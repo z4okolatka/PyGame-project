@@ -38,7 +38,7 @@ class Room:
         ]
 
         x, y = pos[0] + new_chunk[direction][0], \
-            pos[1] + new_chunk[direction][1]
+               pos[1] + new_chunk[direction][1]
         is_free = True
         for room in self.game.rooms:
             for pos in room.chunks:
@@ -96,7 +96,7 @@ class Room:
                 for i in range(len(old_chunk)):
                     if old_chunk[i][2] == chunk[1]:
                         x, y = chunk[0][0] + \
-                            old_chunk[i][0], chunk[0][1] + old_chunk[i][1]
+                               old_chunk[i][0], chunk[0][1] + old_chunk[i][1]
                         for j in range(len(self.chunks)):
                             if (self.chunks[j].x, self.chunks[j].y) == (x, y):
                                 if self.out_doors < self.min_out_doors and not only_wall:
@@ -182,7 +182,8 @@ class Room:
         self.generate_room_barrier()
 
     def generate_room_barrier(self):
-        max_x, max_y = 0, 0
+        max_x, max_y = -10 ** 11, -10 ** 11
+
         min_x, min_y = 10 ** 10, 10 ** 10
         for chunk in self.chunks:
             if chunk.x < min_x:
@@ -210,9 +211,6 @@ class Room:
                 (min_x * self.chunk_size, max_y * self.chunk_size), ((max_x - min_x) * self.chunk_size, 5))
         }
 
-        self.room_area = pg.Rect((min_x * self.chunk_size, min_y * self.chunk_size,
-                                  (max_x - min_x) * self.chunk_size, (max_y - min_y) * self.chunk_size))
-
     def close_room(self):
         next_chunk = [(0, -1, (0, 0, 2, 0), 2),
                       (1, 0, (0, 0, 0, 2), 3),
@@ -223,8 +221,8 @@ class Room:
                 if chunk.type[direction] == 3:
                     next_chunk_is_door = False
                     x, y = chunk.x + \
-                        next_chunk[direction][0], chunk.y + \
-                        next_chunk[direction][1]
+                           next_chunk[direction][0], chunk.y + \
+                           next_chunk[direction][1]
                     for room in self.game.rooms:
                         for chunk_1 in room.chunks:
                             if (chunk_1.x, chunk_1.y) == (x, y):
@@ -247,7 +245,7 @@ class Room:
         for chunk in self.chunks:
             for direction in range(len(chunk.type)):
                 x, y = chunk.x + \
-                    old_chunk[direction][0], chunk.y + old_chunk[direction][1]
+                       old_chunk[direction][0], chunk.y + old_chunk[direction][1]
                 for room in self.game.rooms:
                     for other_chunk in room.chunks:
                         if (other_chunk.x, other_chunk.y) == (x, y):

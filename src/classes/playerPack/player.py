@@ -161,6 +161,7 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
 
     def room_in(self):
         for room in self.game.rooms:
-            if self.rect.colliderect(room.room_area):
-                return room
+            for chunk in room.chunks:
+                if self.rect.colliderect(chunk.chunk_area):
+                    return room
 

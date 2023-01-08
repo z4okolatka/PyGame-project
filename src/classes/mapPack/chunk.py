@@ -2,6 +2,7 @@ import src.setting
 from src.classes.mapPack.block import Block
 from src.classes.mapPack import door
 import main
+import pygame as pg
 
 
 class Chunk:
@@ -10,6 +11,8 @@ class Chunk:
         self.size = src.setting.CHUNK_SIZE
         self.out_door_size = src.setting.CHUNK_OUT_DOOR_SIZE
         self.type = chunk_type
+        self.chunk_area = pg.Rect(self.x * self.size - self.size // 2, self.y * self.size - self.size // 2,
+                                  self.size, self.size)
         '''
         1 - wall
         2 - door to the next chunk
@@ -88,17 +91,17 @@ class Chunk:
         # print(self.doors_start_pos)
         if self.doors_start_pos[0] is not None:
             self.doors.append(
-            door.Door((self.x * self.size, self.y * self.size - self.size // 2), (self.out_door_size, 10),
-                 self.doors_start_pos[0]))
+                door.Door((self.x * self.size, self.y * self.size - self.size // 2), (self.out_door_size, 10),
+                          self.doors_start_pos[0]))
         if self.doors_start_pos[1] is not None:
             self.doors.append(
-            door.Door((self.x * self.size + self.size // 2, self.y * self.size), (10, self.out_door_size),
-                 self.doors_start_pos[1]))
+                door.Door((self.x * self.size + self.size // 2, self.y * self.size), (10, self.out_door_size),
+                          self.doors_start_pos[1]))
         if self.doors_start_pos[2] is not None:
             self.doors.append(
-            door.Door((self.x * self.size, self.y * self.size + self.size // 2), (self.out_door_size, 10),
-                 self.doors_start_pos[2]))
+                door.Door((self.x * self.size, self.y * self.size + self.size // 2), (self.out_door_size, 10),
+                          self.doors_start_pos[2]))
         if self.doors_start_pos[3] is not None:
             self.doors.append(
-            door.Door((self.x * self.size - self.size // 2, self.y * self.size), (10, self.out_door_size),
-                 self.doors_start_pos[3]))
+                door.Door((self.x * self.size - self.size // 2, self.y * self.size), (10, self.out_door_size),
+                          self.doors_start_pos[3]))
