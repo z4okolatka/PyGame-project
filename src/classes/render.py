@@ -13,6 +13,11 @@ class Render():
     def draw_all(self):
         self.draw(self.game.player)
         self.draw(collidableObject.get_refs())
+        # self.draw(self.game.triggers)
+        for room in self.game.rooms:
+            for chunk in room.chunks:
+                self.draw(chunk.blocks)
+
 
     def _draw_one_sprite(self, sprite):
         w, h = sprite.rect.size
