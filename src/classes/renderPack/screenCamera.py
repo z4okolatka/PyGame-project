@@ -89,7 +89,7 @@ class ScreenCamera(FloatCords):
             boundaries = self.game.player.room_in().boundaries
         except:
             return
-        overlap = self.width / 3
+        overlap = self.width / 10
         if self.left - 1 + overlap <= boundaries['left'].right:
             self.left = boundaries['left'].right - overlap
         if self.right + 1 - overlap >= boundaries['right'].left:
@@ -109,7 +109,7 @@ class ScreenCamera(FloatCords):
             boundaries = self.game.player.room_in().boundaries
         except:
             return
-        overlap = self.height / 3
+        overlap = self.height / 10
         if self.top - 1 + overlap <= boundaries['top'].bottom:
             self.top = boundaries['top'].bottom - overlap
         if self.bottom + 1 - overlap >= boundaries['bottom'].top:
