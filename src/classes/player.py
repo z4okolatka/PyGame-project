@@ -2,18 +2,21 @@ import pygame as pg
 import src.setting as settings
 from src.classes import coordHelper
 from src.classes import animation
+from src.classes.objects import collidableObject
 from pathlib import Path
 import main
 
 
-class Player(pg.sprite.Sprite, coordHelper.FloatCords, animation.Animation):
+class Player(pg.sprite.Sprite, coordHelper.FloatCords):
     def __init__(self, game, cords=None):
         super().__init__()
         self.game: main.Game = game
 
         # image and rect
-        animation.Animation.__init__(self, Path.cwd() / 'src/sprites/player.gif')
+        # animation.Animation.__init__(self, Path.cwd() / 'src/sprites/player.gif')
         self.image: pg.Surface
+        self.image = pg.image.load(Path.cwd() / 'src/sprites/player.png')
+        self._facing = 'right'
         self.rect = self.image.get_rect()
 
         # float coordinates
@@ -26,6 +29,7 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords, animation.Animation):
                 display.get_height() // 2 - self.rect.height // 2
             ))
 
+        # speed and position
         self.x = self.rect.x
         self.y = self.rect.y
         self.vx = 0
@@ -44,6 +48,7 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords, animation.Animation):
 
         # attributes
         self._lastKeyboard = pg.key.get_pressed()
+        self.max_zoom_out = .5
 
     def keydown(self, key, pressed):
         """Returns true if key was just pressed"""
@@ -57,6 +62,7 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords, animation.Animation):
         self.normalize_horizontal_speed()
         self.move_x()
         self.horizontal_collision()
+        self.rotate_image()
 
         self.vertical_movement(kb)
         self.normalize_vertical_speed()
@@ -64,9 +70,6 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords, animation.Animation):
         self.vertical_collision()
 
         self._lastKeyboard = kb
-
-        # animation of sprite
-        self.animationTime += self.game.deltatime * 1000
 
     def horizontal_movement(self, keyboard):
         if self.keydown(pg.K_d, keyboard) or self.keydown(pg.K_a, keyboard):
@@ -92,28 +95,31 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords, animation.Animation):
         self.x += self.vx * self.game.deltatime
         self.rect.x = round(self.x)
 
-    def horizontal_collision(self):
-        for sprite in self.game.collision_objects:
-            if sprite.rect.colliderect(self.rect):
-                # climbing on small ledges
-                if self.rect.bottom - sprite.rect.top <= 20 and abs(self.vy) <= 300:
-                    self.bottom = sprite.rect.top
-                    break
+    def rotate_image(self):
+        if self.vx > 0:
+            self.facing = 'right'
+        elif self.vx < 0:
+            self.facing = 'left'
 
+    def horizontal_collision(self):
+        for sprite in collidableObject.check_all_collisions(self):
+            # climbing on small ledges
+            if self.rect.bottom - sprite.rect.top <= 20 and abs(self.vy) <= 300:
+                self.bottom = sprite.rect.top
+            else:
                 if self.rect.centerx <= sprite.rect.centerx and self.vx > 0:
                     self.right = sprite.rect.left
                     self.vx = 0
                 elif self.rect.centerx > sprite.rect.centerx and self.vx < 0:
                     self.left = sprite.rect.right
                     self.vx = 0
-                break
 
         self.rect.x = round(self.x)
 
     def vertical_movement(self, keyboard):
         if self.keydown(pg.K_SPACE, keyboard) and self.jump_num:
             self.vy = -self.jump_initial_speed
-            self.jump_num -= 1
+            # self.jump_num -= 1
         self.vy += self.gravity * self.game.deltatime
 
     def normalize_vertical_speed(self):
@@ -127,15 +133,25 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords, animation.Animation):
         self.rect.y = round(self.y)
 
     def vertical_collision(self):
-        for sprite in self.game.collision_objects:
-            if sprite.rect.colliderect(self.rect):
-                if self.rect.centery < sprite.rect.centery and self.vy > 0:
-                    self.vy = 0
-                    self.bottom = sprite.rect.top
-                    self.jump_num = self.max_jump_num
-                elif self.rect.centery > sprite.rect.centery and self.vy < 0:
-                    self.vy = 0
-                    self.top = sprite.rect.bottom
-                break
+        for sprite in collidableObject.check_all_collisions(self):
+            if self.rect.centery < sprite.rect.centery and self.vy > 0:
+                self.vy = 0
+                self.bottom = sprite.rect.top
+                self.jump_num = self.max_jump_num
+            elif self.rect.centery > sprite.rect.centery and self.vy < 0:
+                self.vy = 0
+                self.top = sprite.rect.bottom
 
         self.rect.y = round(self.y)
+
+    @property
+    def facing(self):
+        return self._facing
+
+    @facing.setter
+    def facing(self, direction):
+        if self._facing == direction:
+            return
+
+        self._facing = direction
+        self.image = pg.transform.flip(self.image, True, False)

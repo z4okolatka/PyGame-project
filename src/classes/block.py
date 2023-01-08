@@ -1,10 +1,11 @@
 import pygame as pg
-from src.classes import coordHelper
+from src.classes.objects import collidableObject
 
 
-class Block(pg.sprite.Sprite, coordHelper.FloatCords):
+class Block(pg.sprite.Sprite, collidableObject):
     def __init__(self, centerpos, size):
         super().__init__()
+        collidableObject.__init__(self)
 
         self.image = pg.Surface(size)
         self.image.fill('white')
