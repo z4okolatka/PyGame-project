@@ -2,7 +2,7 @@ import pygame as pg
 import src.setting as settings
 from src.classes import coordHelper
 from src.classes import animation
-from src.classes.objects import collidableObject, Trigger
+from src.classes.collidableObject import CollidableObject
 from src.classes.inventory import Inventory
 from pathlib import Path
 import main
@@ -74,10 +74,6 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
 
         self._lastKeyboard = kb
 
-
-        # items
-        print(Trigger.get_triggered())
-
     def horizontal_movement(self, keyboard):
         if self.keydown(pg.K_d, keyboard) or self.keydown(pg.K_a, keyboard):
             self.vx = 0
@@ -109,7 +105,7 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
             self.facing = 'left'
 
     def horizontal_collision(self):
-        for sprite in collidableObject.check_all_collisions(self):
+        for sprite in CollidableObject.get_collided(self):
             # climbing on small ledges
             if self.rect.bottom - sprite.rect.top <= 20 and abs(self.vy) <= 300:
                 self.bottom = sprite.rect.top
@@ -140,7 +136,7 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
         self.rect.y = round(self.y)
 
     def vertical_collision(self):
-        for sprite in collidableObject.check_all_collisions(self):
+        for sprite in CollidableObject.get_collided(self):
             if self.rect.centery < sprite.rect.centery and self.vy > 0:
                 self.vy = 0
                 self.bottom = sprite.rect.top

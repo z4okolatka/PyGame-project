@@ -1,6 +1,8 @@
 import main
-from src.classes.block import *
-from src.classes.chunk import *
+from src.classes.block import Block
+from src.classes.chunk import Chunk
+from src.classes.trigger import Trigger
+from src.classes.collidableObject import CollidableObject
 
 from random import randint
 
@@ -16,20 +18,22 @@ class Room:
         self.new_chunks = [(start_chunk, start_chunk_mask)]
 
         self.game: main.Game = game
-        self.max_chunks = randint(5, 10)
+        self.max_chunks = 10
         self.min_chunks = 3
         self.n_chunks = 0
         self.generate_room()
         # print('Room generated')
 
     def next_chunk_is_free(self, direction, pos):
+        new_chunk = [
+            (0, -1),  # top
+            (1, 0),  # right
+            (0, 1),  # bottom
+            (-1, 0)  # left
+        ]
 
-        new_chunk = [(0, -1),
-                     (1, 0),
-                     (0, 1),
-                     (-1, 0)]
-
-        x, y = pos[0] + new_chunk[direction][0], pos[1] + new_chunk[direction][1]
+        x, y = pos[0] + new_chunk[direction][0],\
+            pos[1] + new_chunk[direction][1]
         is_free = True
         for room in self.game.rooms:
             for pos in room.chunks:
@@ -63,7 +67,6 @@ class Room:
         self.chunks.append(Chunk(self.game, chunk[0], chunk_type))
 
     def post_generate_chunks(self, chunks):
-
         old_chunk = [(0, 1, (0, 0, 2, 0), 0),
                      (-1, 0, (0, 0, 0, 2), 1),
                      (0, -1, (2, 0, 0, 0), 2),
@@ -87,7 +90,8 @@ class Room:
             if is_free:
                 for i in range(len(old_chunk)):
                     if old_chunk[i][2] == chunk[1]:
-                        x, y = chunk[0][0] + old_chunk[i][0], chunk[0][1] + old_chunk[i][1]
+                        x, y = chunk[0][0] + \
+                            old_chunk[i][0], chunk[0][1] + old_chunk[i][1]
                         for j in range(len(self.chunks)):
                             if (self.chunks[j].x, self.chunks[j].y) == (x, y):
                                 if self.out_doors < self.min_out_doors and not only_wall:
@@ -101,7 +105,8 @@ class Room:
                                     #        mask = tuple(mask)
                                     #        chunk[1] = mask
                                     #        break
-                                    self.chunks[j].doors_start_pos[i] = (chunk[0])
+                                    self.chunks[j].doors_start_pos[i] = (
+                                        chunk[0])
                                     self.game.new_rooms_cords.append(chunk)
                                 else:
                                     self.chunks[j].type[old_chunk[i][3]] = 1
@@ -110,18 +115,20 @@ class Room:
 
     def generate_room(self):
         if self.start_room:
-            self.chunks.append(Chunk(self.game, (0, 0), (1, 2, 2, 1)))
-            self.chunks.append(Chunk(self.game, (1, 0), (1, 1, 2, 2)))
-            self.chunks.append(Chunk(self.game, (0, 1), (2, 2, 1, 3)))
-            self.chunks.append(Chunk(self.game, (1, 1), (2, 1, 1, 2)))
-
+            self.chunks.extend([
+                Chunk(self.game, (0, 0), (1, 2, 2, 1)),
+                Chunk(self.game, (1, 0), (1, 1, 2, 2)),
+                Chunk(self.game, (0, 1), (2, 2, 1, 3)),
+                Chunk(self.game, (1, 1), (2, 1, 1, 2))
+            ])
             return
+        
         continue_generate = True
         post_chunks = []
-        old_chunk = [(0, 1, (0, 0, 2, 0), 0),
-                     (-1, 0, (0, 0, 0, 2), 1),
-                     (0, -1, (2, 0, 0, 0), 2),
-                     (1, 0, (0, 2, 0, 0), 3)]
+        # old_chunk = [(0, 1, (0, 0, 2, 0), 0),
+        #              (-1, 0, (0, 0, 0, 2), 1),
+        #              (0, -1, (2, 0, 0, 0), 2),
+        #              (1, 0, (0, 2, 0, 0), 3)]
         while continue_generate:
             continue_generate = False
             n = len(self.new_chunks)
@@ -175,7 +182,9 @@ class Room:
             for direction in range(len(chunk.type)):
                 if chunk.type[direction] == 3:
                     next_chunk_is_door = False
-                    x, y = chunk.x + next_chunk[direction][0], chunk.y + next_chunk[direction][1]
+                    x, y = chunk.x + \
+                        next_chunk[direction][0], chunk.y + \
+                        next_chunk[direction][1]
                     for room in self.game.rooms:
                         for chunk_1 in room.chunks:
                             if (chunk_1.x, chunk_1.y) == (x, y):
@@ -197,7 +206,8 @@ class Room:
                      (-1, 0, (0, 2, 0, 0), 1)]
         for chunk in self.chunks:
             for direction in range(len(chunk.type)):
-                x, y = chunk.x + old_chunk[direction][0], chunk.y + old_chunk[direction][1]
+                x, y = chunk.x + \
+                    old_chunk[direction][0], chunk.y + old_chunk[direction][1]
                 for room in self.game.rooms:
                     for other_chunk in room.chunks:
                         if (other_chunk.x, other_chunk.y) == (x, y):
@@ -205,25 +215,22 @@ class Room:
                                 mask = list(other_chunk.type)
                                 if chunk.type[direction] == 3:
                                     mask[old_chunk[direction][3]] = 3
-                                    other_chunk.doors_start_pos[old_chunk[direction][3]] = (chunk.x, chunk.y)
-                                    self.game.new_rooms_cords.append(((chunk.x, chunk.y), old_chunk[direction][2]))
+                                    other_chunk.doors_start_pos[old_chunk[direction][3]] = (
+                                        chunk.x, chunk.y)
+                                    self.game.new_rooms_cords.append(
+                                        ((chunk.x, chunk.y), old_chunk[direction][2]))
                                 elif chunk.type[direction] == 1:
                                     mask[old_chunk[direction][3]] = 1
                                 other_chunk.type = mask
                                 other_chunk.generate_chunk()
-            #print(chunk.blocks)
-            for block in chunk.blocks:
-                block.destroy()
-            # chunk.blocks = []
-            #print()
-           # print(chunk.blocks)
 
         for chunk in self.chunks:
             for door_pos in chunk.doors_start_pos:
                 if door_pos is not None:
-                    for door in self.game.triggers:
+                    for door in Trigger.get_refs():
                         if door.start_room_pos == door_pos:
-                            del self.game.triggers[self.game.triggers.index(door)]
+                            door.destroy()
                     for cord in self.game.new_rooms_cords:
                         if cord[0] == door_pos:
-                            del self.game.new_rooms_cords[self.game.new_rooms_cords.index(cord)]
+                            del self.game.new_rooms_cords[self.game.new_rooms_cords.index(
+                                cord)]

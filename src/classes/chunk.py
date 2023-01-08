@@ -1,5 +1,5 @@
 import src.setting
-from src.classes.block import *
+from src.classes.block import Block
 from src.classes.door import Door
 import main
 
@@ -79,18 +79,14 @@ class Chunk:
                       (10, (self.size - self.out_door_size) // 2)))
         # print(self.doors_start_pos)
         if self.doors_start_pos[0] is not None:
-            self.game.triggers.append(
                 Door(self.game, (self.x * self.size, self.y * self.size - self.size // 2), (self.out_door_size, 10),
-                     self.doors_start_pos[0]))
+                     self.doors_start_pos[0])
         if self.doors_start_pos[1] is not None:
-            self.game.triggers.append(
                 Door(self.game, (self.x * self.size + self.size // 2, self.y * self.size), (10, self.out_door_size),
-                     self.doors_start_pos[1]))
+                     self.doors_start_pos[1])
         if self.doors_start_pos[2] is not None:
-            self.game.triggers.append(
                 Door(self.game, (self.x * self.size, self.y * self.size + self.size // 2), (self.out_door_size, 10),
-                     self.doors_start_pos[2]))
+                     self.doors_start_pos[2])
         if self.doors_start_pos[3] is not None:
-            self.game.triggers.append(
                 Door(self.game, (self.x * self.size - self.size // 2, self.y * self.size), (10, self.out_door_size),
-                     self.doors_start_pos[3]))
+                     self.doors_start_pos[3])

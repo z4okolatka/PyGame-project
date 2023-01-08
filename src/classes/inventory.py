@@ -14,7 +14,7 @@ class Inventory(FloatCords):
 
         self.image = pg.Surface(
             (max_size * (cell_size + 10), cell_size + 10), pg.SRCALPHA)
-        self.image.fill('brown')
+        self.image.fill((0, 255, 0, 100))
         self.rect = self.image.get_rect()
         self.rect.midtop = (self.game.camera.width / 2, 0)
 

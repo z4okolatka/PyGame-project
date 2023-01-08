@@ -1,6 +1,7 @@
 import pygame as pg
 from collections.abc import Iterable
-from src.classes.objects import collidableObject, Trigger
+from src.classes.collidableObject import CollidableObject
+from src.classes.trigger import Trigger
 from src.classes.utilites import *
 import main
 
@@ -12,8 +13,7 @@ class Render():
 
     def draw_all(self):
         self.draw(self.game.player)
-        self.draw(collidableObject.get_refs())
-        # self.draw(self.game.triggers)
+        self.draw(Trigger.get_refs())
         for room in self.game.rooms:
             for chunk in room.chunks:
                 self.draw(chunk.blocks)
