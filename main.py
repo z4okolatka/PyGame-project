@@ -25,8 +25,8 @@ class Game:
         self.paused = False
 
         # objects and object gorups
-        self.accecory_types = ['nimb', 'flash', 'nikee', 'drill',
-                               'banana', 'mushroom', '1', '2', '3', '4', '5', '6']
+        self.accecory_types = ['nimb', 'flash', 'truba', 'drill',
+                               'banana', 'grib', 'air_forces']
         self.sword_types = ['wolfOdrill', 'niggaOshake', 'skibididaMdadaBOOM']
         self.list = []
         self.items = []
@@ -103,13 +103,11 @@ class Game:
     def load_sprites(self):
         self.items_images = {}
         sprite_path = Path.cwd() / 'src/sprites'
-        for t in ('nimb',):
-            path = sprite_path / t
-            images = path.glob('*.png')
-            with open(path / 'durations.txt', 'r') as file:
-                durations = list(map(int, file.readlines()))
-            self.items_images[t]: dict[str: list[(pg.Surface, int)]] = list([(pg.image.load(
-                image).convert_alpha(), durations[i]) for i, image in enumerate(images)])
+        
+        for type_ in self.accecory_types:
+            path = sprite_path / f'{type_}.png'
+            image = pg.image.load(path).convert_alpha()
+            self.items_images[type_] = image
 
     def update(self):
         if not self.paused:
@@ -157,7 +155,7 @@ class Game:
         [i.update() for i in enemy.Enemy.get_refs()]
         for i in self.items:
             i.update()
-        trigger.Trigger.activate_triggered()
+        trigger.Trigger.activate_allcls_triggered()
         self.info.show('hp',self.player.hp)
 
     def update_menu(self):

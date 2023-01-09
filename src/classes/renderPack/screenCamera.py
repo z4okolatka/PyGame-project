@@ -73,10 +73,10 @@ class ScreenCamera(FloatCords):
         if not self.smooth_scale:
             return
         sign = self.smooth_scale / abs(self.smooth_scale)
-        self.scale += sign * 0.001
+        self.scale += sign * 0.01
         self._scale = round(
             clamp(self.game.player.max_zoom_out, self._scale, 2), 3)
-        self.smooth_scale -= sign * 0.001
+        self.smooth_scale -= sign * 0.01
         self.smooth_scale = round(self.smooth_scale, 3)
 
     def move_x(self):

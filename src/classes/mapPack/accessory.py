@@ -45,11 +45,8 @@ class Accessory(Animation, FallingObject):
         self.type = type_
         self.animated = False
 
-        if type_ == 'nimb':
-            Animation.__init__(self, self.game, 'nimb')
-        elif type_ == 'sword':
-            self.image = pg.Surface((48, 96))
-            self.image.fill('yellow')
+        if type_ in self.game.accecory_types:
+            self.image = self.game.items_images[type_]
         else:
             self.image = pg.Surface((48, 48))
             self.image.fill('turquoise')

@@ -13,7 +13,7 @@ class Item:
         self.amount = 1
 
         try:
-            self.image = pg.transform.scale(self.inventory.game.items_images[type_][0][0],
+            self.image = pg.transform.scale(self.inventory.game.items_images[type_],
                                             (self.inventory.cell_size, self.inventory.cell_size))
         except KeyError:
             self.image = pg.Surface(
