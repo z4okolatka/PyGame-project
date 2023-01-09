@@ -11,6 +11,7 @@ class Animation:
 
         self.animationFrameIndex = 0
         self.animTime = 0
+        self.animated = True
 
         self.image = self.images[self.animationFrameIndex][0]
 

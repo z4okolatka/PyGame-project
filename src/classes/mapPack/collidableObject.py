@@ -1,3 +1,4 @@
+import pygame as pg
 from src.classes.utilsPack import coordHelper
 import weakref
 

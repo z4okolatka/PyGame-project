@@ -1,6 +1,7 @@
 import pygame as pg
 import screeninfo
 import src.setting as settings
+from math import ceil
 from src.classes.utilsPack.utilites import *
 from src.classes.utilsPack.coordHelper import FloatCords
 import main
@@ -27,7 +28,10 @@ class ScreenCamera(FloatCords):
         self.half_dw = 0
         self.half_dh = 0
         self._scale = 1
+        self.scale_step = 0.1
         self.smooth_scale = 0
+        self.prevent_scale = [0, 0]
+        self.prevent_zoom_out = [False, False]
         self.x = 0
         self.y = 0
 
@@ -42,6 +46,9 @@ class ScreenCamera(FloatCords):
 
     @scale.setter
     def scale(self, n):
+        if any(self.prevent_zoom_out) and n < self.scale:
+            return
+        
         self.half_dw = (self.width - self.base_width * 1 / n)
         self.half_dh = (self.height - self.base_height * 1 / n)
 
@@ -58,19 +65,19 @@ class ScreenCamera(FloatCords):
     def follow_player(self):
         self.smooth_zoom()
         self.move_x()
-        # self.horizontal_collision()
+        self.horizontal_collision()
         self.move_y()
-        # self.vertical_collision()
+        self.vertical_collision()
 
     def smooth_zoom(self):
         if not self.smooth_scale:
             return
         sign = self.smooth_scale / abs(self.smooth_scale)
-        self.scale += sign * .01
+        self.scale += sign * 0.001
         self._scale = round(
-            clamp(self.game.player.max_zoom_out, self._scale, 2), 2)
-        self.smooth_scale -= sign * .01
-        self.smooth_scale = round(self.smooth_scale, 2)
+            clamp(self.game.player.max_zoom_out, self._scale, 2), 3)
+        self.smooth_scale -= sign * 0.001
+        self.smooth_scale = round(self.smooth_scale, 3)
 
     def move_x(self):
         pcx = self.game.player.centerx
@@ -88,6 +95,8 @@ class ScreenCamera(FloatCords):
         except:
             return
         overlap = self.width / 10
+        # width = boundaries['right'].left - boundaries['left'].right
+
         if self.left - 1 + overlap <= boundaries['left'].right:
             self.left = boundaries['left'].right - overlap
         if self.right + 1 - overlap >= boundaries['right'].left:
@@ -108,6 +117,8 @@ class ScreenCamera(FloatCords):
         except:
             return
         overlap = self.height / 10
+        # height = boundaries['bottom'].top - boundaries['top'].bottom
+
         if self.top - 1 + overlap <= boundaries['top'].bottom:
             self.top = boundaries['top'].bottom - overlap
         if self.bottom + 1 - overlap >= boundaries['bottom'].top:

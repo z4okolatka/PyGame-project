@@ -1,10 +1,10 @@
 import pygame as pg
-from PIL import Image
+import random
 from src.classes.renderPack import screenCamera, render
-from src.classes.playerPack import player, interface
-from src.classes.mapPack import door, room, roomBarrier, block, trigger, accessory
+from src.classes.playerPack import player, interface, item
+from src.classes.mapPack import door, room, roomBarrier, block, trigger, accessory, sword
 from src.classes.menuPack import menu
-from src.classes.utilsPack import infoDisplay
+from src.classes.utilsPack import infoDisplay, keepRefs
 from src.classes.utilsPack.utilites import *
 from pathlib import Path
 import src.setting as settings
@@ -13,7 +13,7 @@ import src.setting as settings
 class Game:
     def __init__(self):
         pg.init()
-        trigger.Trigger.init_game(self)
+        keepRefs.KeepRefs.init_game(self)
 
         self.FPS = settings.FPS
         self.clock = pg.time.Clock()
@@ -23,11 +23,15 @@ class Game:
         self.paused = False
 
         # objects and object gorups
+        self.accecory_types = ['nimb', 'flash', 'nikee', 'drill',
+                               'banana', 'mushroom', '1', '2', '3', '4', '5', '6']
+        self.sword_types = ['wolfOdrill', 'niggaOshake', 'skibididaMdadaBOOM']
         self.list = []
         self.items = []
         self.camera = screenCamera.ScreenCamera(self)
         self.load_sprites()
         self.player = player.Player(self)
+        item.Item.init_game(self)
         self.boundaries: dict[str: roomBarrier.Barrier] = {
             'left': roomBarrier.Barrier(
                 (-self.camera.width, self.camera.centery), (5, self.camera.height * 3)),
@@ -48,7 +52,8 @@ class Game:
         self.rooms = []
         self.rooms.append(room.Room(self, None, None, start_room=True))
         self.new_rooms_cords = [((-1, 1), (0, 3, 0, 0))]
-        list(i for i in self.rooms[0].chunks if i.x == 0 and i.y == 1)[0].doors.append(door.Door((-100, 100), (20, 20), (-1, 1)))
+        list(i for i in self.rooms[0].chunks if i.x == 0 and i.y == 1)[
+            0].doors.append(door.Door((-100, 100), (20, 20), (-1, 1)))
 
     def run(self):
         self.running = True
@@ -62,10 +67,15 @@ class Game:
                     if event.key == pg.K_ESCAPE:
                         self.paused = not self.paused
                 if event.type == pg.MOUSEWHEEL:
-                    if event.y > 0:
-                        self.camera.smooth_scale += .1
-                    else:
-                        self.camera.smooth_scale -= .1
+                    sign = - event.y // abs(event.y)
+                    inventory = self.player.inventory
+                    ind = clamp(-1, inventory.selectedIndex +
+                                sign, inventory.max_size)
+                    if ind == -1:
+                        ind = inventory.max_size - 1
+                    elif ind == inventory.max_size:
+                        ind = 0
+                    inventory.selectedIndex = ind
                 if event.type == pg.WINDOWMOVED:
                     self.paused = True
 
@@ -84,7 +94,7 @@ class Game:
             self.info.show(None, round(self.clock.get_fps()), .01)
 
         pg.quit()
-    
+
     def load_sprites(self):
         self.items_images = {}
         sprite_path = Path.cwd() / 'src/sprites'
@@ -93,7 +103,8 @@ class Game:
             images = path.glob('*.png')
             with open(path / 'durations.txt', 'r') as file:
                 durations = list(map(int, file.readlines()))
-            self.items_images[t] = list([(pg.image.load(image).convert_alpha(), durations[i]) for i, image in enumerate(images)])
+            self.items_images[t]: dict[str: list[(pg.Surface, int)]] = list([(pg.image.load(
+                image).convert_alpha(), durations[i]) for i, image in enumerate(images)])
 
     def update(self):
         if not self.paused:
@@ -103,29 +114,44 @@ class Game:
 
     def update_game(self):
         # temporary creating platforms
-
+        self.key_pressed = pg.key.get_pressed()
         for event in self.events:
+            event.pos = pg.mouse.get_pos()
+            pos = (self.camera.x + event.pos[0] / self.camera.scale,
+                   self.camera.y + event.pos[1] / self.camera.scale)
             if event.type == pg.KEYDOWN:
-                if event.key == pg.K_LSHIFT:
-                    try:
-                        self.list[0].destroy()
-                        del self.list[0]
-                    except:
-                        pass
-                    self.list.append(block.Block(
-                        self.player.rect.midbottom, (100, 10), 'red'))
+                if event.key == pg.K_1:
+                    self.items.append(
+                        accessory.Accessory(
+                            self, pos, random.choice(self.accecory_types))
+                    )
+                    sign = 1 if self.player.facing == 'right' else - 1
+                    self.items[-1].vx = 1000 * sign
+                    self.items[-1].vy = -1000
+                if event.key == pg.K_2:
+                    self.items.append(
+                        sword.Sword(self, pos, random.choice(self.sword_types))
+                    )
             if event.type == pg.MOUSEBUTTONDOWN:
-                pos = (self.camera.x + event.pos[0] / self.camera.scale,
-                       self.camera.y + event.pos[1] / self.camera.scale)
                 if event.button == 1:
-                    self.items.append(accessory.Accessory(self, pos, 'nimb'))
+                    pass
                 if event.button == 3:
                     self.player.center = pos
+        if self.key_pressed[pg.K_LSHIFT]:
+            self.a = block.Block(
+                (self.player.rect.centerx, self.player.rect.bottom + 5), (100, 10))
+        else:
+            self.a = None
+        if self.key_pressed[pg.K_q]:
+            self.camera.smooth_scale += self.camera.scale_step / 10
+        if self.key_pressed[pg.K_e]:
+            self.camera.smooth_scale -= self.camera.scale_step / 10
+
         self.player.update()
         self.camera.follow_player()
         for i in self.items:
             i.update()
-        trigger.Trigger.activate_triggered()
+        trigger.Trigger.activate_allcls_triggered()
 
     def update_menu(self):
         self.menu.update()

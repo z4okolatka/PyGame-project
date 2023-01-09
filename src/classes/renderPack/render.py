@@ -14,9 +14,6 @@ class Render():
         self.draw(self.game.player)
         self.draw(trigger.Trigger.get_refs())
         self.draw(collidableObject.CollidableObject.get_refs())
-        # for room in self.game.rooms:
-        #     boundaries = list(room.boundaries.values())
-        #     self.draw(boundaries)
         self.draw(self.game.items)
 
     def _draw_one_sprite(self, sprite):

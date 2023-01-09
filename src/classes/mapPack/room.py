@@ -3,6 +3,7 @@ from src.classes.mapPack.block import Block
 from src.classes.mapPack.chunk import Chunk
 from src.classes.mapPack.trigger import Trigger
 from src.classes.mapPack.roomBarrier import Barrier
+import src.classes.mapPack.door as Door
 from src.classes.mapPack.collidableObject import CollidableObject
 from src import setting
 
@@ -265,7 +266,7 @@ class Room:
         for chunk in self.chunks:
             for door_pos in chunk.doors_start_pos:
                 if door_pos is not None:
-                    for door in Trigger.get_refs():
+                    for door in Door.Door.get_refs():
                         if door.start_room_pos == door_pos:
                             if door in chunk.doors:
                                 chunk.doors.remove(door)
