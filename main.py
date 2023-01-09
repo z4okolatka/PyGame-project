@@ -5,6 +5,7 @@ from src.classes.playerPack import player, interface
 from src.classes.mapPack import door, room, roomBarrier, block, trigger, accessory
 from src.classes.menuPack import menu
 from src.classes.utilsPack import infoDisplay
+from src.classes.enemyPack import enemy, groundEnemy, airEnemy, turretEnemy
 from src.classes.utilsPack.utilites import *
 from pathlib import Path
 import src.setting as settings
@@ -48,7 +49,10 @@ class Game:
         self.rooms = []
         self.rooms.append(room.Room(self, None, None, start_room=True))
         self.new_rooms_cords = [((-1, 1), (0, 3, 0, 0))]
-        list(i for i in self.rooms[0].chunks if i.x == 0 and i.y == 1)[0].doors.append(door.Door((-100, 100), (20, 20), (-1, 1)))
+        list(i for i in self.rooms[0].chunks if i.x == 0 and i.y == 1)[0].doors.append(
+            door.Door((-100, 100), (20, 20), (-1, 1)))
+
+        turretEnemy.TurretEnemy(self, (-100, 100))
 
     def run(self):
         self.running = True
@@ -84,7 +88,7 @@ class Game:
             self.info.show(None, round(self.clock.get_fps()), .01)
 
         pg.quit()
-    
+
     def load_sprites(self):
         self.items_images = {}
         sprite_path = Path.cwd() / 'src/sprites'
@@ -93,7 +97,8 @@ class Game:
             images = path.glob('*.png')
             with open(path / 'durations.txt', 'r') as file:
                 durations = list(map(int, file.readlines()))
-            self.items_images[t] = list([(pg.image.load(image).convert_alpha(), durations[i]) for i, image in enumerate(images)])
+            self.items_images[t] = list(
+                [(pg.image.load(image).convert_alpha(), durations[i]) for i, image in enumerate(images)])
 
     def update(self):
         if not self.paused:
@@ -123,9 +128,11 @@ class Game:
                     self.player.center = pos
         self.player.update()
         self.camera.follow_player()
+        [i.update() for i in enemy.Enemy.get_refs()]
         for i in self.items:
             i.update()
         trigger.Trigger.activate_triggered()
+        self.info.show('hp',self.player.hp)
 
     def update_menu(self):
         self.menu.update()

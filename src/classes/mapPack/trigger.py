@@ -37,7 +37,7 @@ class Trigger(pg.sprite.Sprite, coordHelper.FloatCords):
 
     def __init__(self, centerpos, size, fill=False):
         super().__init__()
-        Trigger.__refs__.append(weakref.ref(self))
+        self.__class__.__refs__.append(weakref.ref(self))
 
         self.game = Trigger.game
         self.player = self.game.player

@@ -22,13 +22,13 @@ class Accessory(coordHelper.FloatCords, Animation):
         self.game: main.Game = game
         self.type = type_
 
-        match type_:
-            case 'nimb':
-                Animation.__init__(self, self.game, 'nimb')
-                # self.image = pg.image.load(Path.cwd() / 'src/sprites/nimb.png')
-            case _:
-                self.image = pg.Surface((48, 48))
-                self.image.fill('turquoise')
+
+        if type_ ==  'nimb':
+            Animation.__init__(self, self.game, 'nimb')
+            # self.image = pg.image.load(Path.cwd() / 'src/sprites/nimb.png')
+        else:
+            self.image = pg.Surface((48, 48))
+            self.image.fill('turquoise')
         self.rect = self.image.get_rect()
         self.rect.midbottom = midbottom
         self.trigger = AccessoryTriger(self, self.rect.center, self.rect.size)

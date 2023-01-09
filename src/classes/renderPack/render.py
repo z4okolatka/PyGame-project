@@ -1,6 +1,7 @@
 import pygame as pg
 from collections.abc import Iterable
 from src.classes.mapPack import collidableObject, trigger
+from src.classes.enemyPack import enemy
 from src.classes.utilsPack.utilites import *
 import main
 
@@ -14,6 +15,7 @@ class Render():
         self.draw(self.game.player)
         self.draw(trigger.Trigger.get_refs())
         self.draw(collidableObject.CollidableObject.get_refs())
+        self.draw(enemy.Enemy.get_refs())
         # for room in self.game.rooms:
         #     boundaries = list(room.boundaries.values())
         #     self.draw(boundaries)

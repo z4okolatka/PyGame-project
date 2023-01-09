@@ -3,7 +3,7 @@ from src.classes.mapPack.block import Block
 from src.classes.mapPack.chunk import Chunk
 from src.classes.mapPack.trigger import Trigger
 from src.classes.mapPack.roomBarrier import Barrier
-from src.classes.mapPack.collidableObject import CollidableObject
+from src.classes.mapPack import door as door_class
 from src import setting
 
 from random import randint
@@ -266,10 +266,11 @@ class Room:
             for door_pos in chunk.doors_start_pos:
                 if door_pos is not None:
                     for door in Trigger.get_refs():
-                        if door.start_room_pos == door_pos:
-                            if door in chunk.doors:
-                                chunk.doors.remove(door)
-                    for cord in self.game.new_rooms_cords:
-                        if cord[0] == door_pos:
-                            del self.game.new_rooms_cords[self.game.new_rooms_cords.index(
-                                cord)]
+                        if isinstance(door, door_class.Door):
+                            if door.start_room_pos == door_pos:
+                                if door in chunk.doors:
+                                    chunk.doors.remove(door)
+                        for cord in self.game.new_rooms_cords:
+                            if cord[0] == door_pos:
+                                del self.game.new_rooms_cords[self.game.new_rooms_cords.index(
+                                    cord)]

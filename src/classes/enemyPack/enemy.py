@@ -1,3 +1,5 @@
+import math
+
 import pygame as pg
 import src.setting as settings
 from src.classes.utilsPack import coordHelper
@@ -8,16 +10,29 @@ from pathlib import Path
 import main
 
 
-class Player(pg.sprite.Sprite, coordHelper.FloatCords):
+class Enemy(pg.sprite.Sprite, coordHelper.FloatCords):
+    __refs__ = []
+
+    @classmethod
+    def get_refs(cls):
+        for obj in cls.__refs__:
+            if obj is None:
+                cls.__refs__.remove(obj)
+                continue
+            yield obj
+
+    def destroy(self):
+        Enemy.__refs__.remove(self)
+
     def __init__(self, game, cords=None):
         super().__init__()
+        Enemy.__refs__.append(self)
         self.game: main.Game = game
-        self.inventory = inventory.Inventory(self.game)
 
-        # image and rect
-        # animation.Animation.__init__(self, Path.cwd() / 'src/sprites/player.gif')
         self.image: pg.Surface
-        self.image = pg.image.load(Path.cwd() / 'src/sprites/player.png')
+        self.image = pg.image.load(Path.cwd() / 'src/sprites/kirill.png')
+        self.image = pg.transform.scale(self.image, (90, 180))
+
         self._facing = 'right'
         self.rect = self.image.get_rect()
 
@@ -51,46 +66,51 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
         # attributes
         self._lastKeyboard = pg.key.get_pressed()
         self.max_zoom_out = .2
-        self.hp = 100
-        self.damage_tick = 0
-        self.invulnerability_time = 1
 
-    def keydown(self, key, pressed):
-        """Returns true if key was just pressed"""
-        return (not self._lastKeyboard[key]) and pressed[key]
+        self.aggression_distance = 500
+        self.damage = 5
+
+    @property
+    def distance_to_player(self):
+        return math.sqrt((self.x - self.game.player.x) ** 2 + (self.y - self.game.player.y) ** 2)
+
+    def movement(self):
+        # self.horizontal_movement()
+        # self.normalize_horizontal_speed()
+        # self.move_x()
+        # self.horizontal_collision()
+        # self.rotate_image()
+        #
+        # self.vertical_movement()
+        # self.normalize_vertical_speed()
+        # self.move_y()
+        # self.vertical_collision()
+        pass
+
+    def idle_movement(self):
+        pass
 
     def update(self):
-        # movement
-        # keyboard input
-        kb = pg.key.get_pressed()
+        if self.distance_to_player <= self.aggression_distance:
+            self.movement()
+        else:  # self.vy = 0
+            self.idle_movement()
 
-        self.horizontal_movement(kb)
-        self.normalize_horizontal_speed()
-        self.move_x()
-        self.horizontal_collision()
-        self.rotate_image()
-
-        self.vertical_movement(kb)
-        self.normalize_vertical_speed()
-        self.move_y()
-        self.vertical_collision()
-
-        self._lastKeyboard = kb
-
-    def horizontal_movement(self, keyboard):
-        if self.keydown(pg.K_d, keyboard) or self.keydown(pg.K_a, keyboard):
-            self.vx = 0
-        if keyboard[pg.K_d]:
-            self.vx += self.vx_acceleration
-        if keyboard[pg.K_a]:
-            self.vx -= self.vx_acceleration
-        if not keyboard[pg.K_a] and not keyboard[pg.K_d] and self.vx:
-            if self.vx < 0:
-                self.vx += self.vx_acceleration
-            else:
-                self.vx -= self.vx_acceleration
-            if abs(self.vx) <= self.vx_acceleration:
-                self.vx = 0
+    def horizontal_movement(self):
+        # if self.keydown(pg.K_d, keyboard) or self.keydown(pg.K_a, keyboard):
+        #    self.vx = 0
+        # if keyboard[pg.K_d]:
+        #    self.vx += self.vx_acceleration
+        # if keyboard[pg.K_a]:
+        #    self.vx -= self.vx_acceleration
+        # if not keyboard[pg.K_a] and not keyboard[pg.K_d] and self.vx:
+        #    if self.vx < 0:
+        #        self.vx += self.vx_acceleration
+        #    else:
+        #        self.vx -= self.vx_acceleration
+        #    if abs(self.vx) <= self.vx_acceleration:
+        #        self.vx = 0
+        print(1)
 
     def normalize_horizontal_speed(self):
         if abs(self.vx) >= self.max_vx:
@@ -122,11 +142,12 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
 
         self.rect.x = round(self.x)
 
-    def vertical_movement(self, keyboard):
-        if self.keydown(pg.K_SPACE, keyboard) and self.jump_num:
-            self.vy = -self.jump_initial_speed
-            # self.jump_num -= 1
-        self.vy += self.gravity * self.game.deltatime
+    def vertical_movement(self):
+        # if self.keydown(pg.K_SPACE, keyboard) and self.jump_num:
+        #    self.vy = -self.jump_initial_speed
+        #    # self.jump_num -= 1
+        # self.vy += self.gravity * self.game.deltatime
+        print(2)
 
     def normalize_vertical_speed(self):
         if abs(self.vy) >= self.max_vy:
@@ -147,8 +168,25 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
             elif self.rect.centery > sprite.rect.centery and self.vy < 0:
                 self.vy = 0
                 self.top = sprite.rect.bottom
-
         self.rect.y = round(self.y)
+
+    def collision_with_player(self):
+        if self.rect.colliderect(self.game.player.rect):
+            self.collision_with_player_action()
+
+    def collision_with_player_action(self):
+        self.damage_player()
+
+    def damage_player(self):
+        if (pg.time.get_ticks() - self.game.player.damage_tick) / 1000 >= self.game.player.invulnerability_time:
+            self.game.player.hp -= self.damage
+            self.game.player.damage_tick = pg.time.get_ticks()
+
+    def room_in(self):
+        for room in self.game.rooms:
+            for chunk in room.chunks:
+                if self.rect.colliderect(chunk.chunk_area):
+                    return room
 
     @property
     def facing(self):
@@ -161,10 +199,3 @@ class Player(pg.sprite.Sprite, coordHelper.FloatCords):
 
         self._facing = direction
         self.image = pg.transform.flip(self.image, True, False)
-
-    def room_in(self):
-        for room in self.game.rooms:
-            for chunk in room.chunks:
-                if self.rect.colliderect(chunk.chunk_area):
-                    return room
-
