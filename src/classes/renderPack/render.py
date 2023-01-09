@@ -1,6 +1,7 @@
 import pygame as pg
 from collections.abc import Iterable
 from src.classes.mapPack import collidableObject, trigger
+from src.classes.enemyPack import enemy
 from src.classes.utilsPack.utilites import *
 import main
 

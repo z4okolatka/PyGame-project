@@ -4,6 +4,8 @@ from src.classes.renderPack import screenCamera, render
 from src.classes.playerPack import player, interface, item
 from src.classes.mapPack import door, room, roomBarrier, block, trigger, accessory, sword
 from src.classes.menuPack import menu
+from src.classes.utilsPack import infoDisplay
+from src.classes.enemyPack import enemy, groundEnemy, airEnemy, turretEnemy
 from src.classes.utilsPack import infoDisplay, keepRefs
 from src.classes.utilsPack.utilites import *
 from pathlib import Path
@@ -52,6 +54,8 @@ class Game:
         self.rooms = []
         self.rooms.append(room.Room(self, None, None, start_room=True))
         self.new_rooms_cords = [((-1, 1), (0, 3, 0, 0))]
+
+        turretEnemy.TurretEnemy(self, (-100, 100))
         list(i for i in self.rooms[0].chunks if i.x == 0 and i.y == 1)[
             0].doors.append(door.Door((-100, 100), (20, 20), (-1, 1)))
 
@@ -94,6 +98,7 @@ class Game:
             self.info.show(None, round(self.clock.get_fps()), .01)
 
         pg.quit()
+
 
     def load_sprites(self):
         self.items_images = {}
@@ -149,9 +154,11 @@ class Game:
 
         self.player.update()
         self.camera.follow_player()
+        [i.update() for i in enemy.Enemy.get_refs()]
         for i in self.items:
             i.update()
-        trigger.Trigger.activate_allcls_triggered()
+        trigger.Trigger.activate_triggered()
+        self.info.show('hp',self.player.hp)
 
     def update_menu(self):
         self.menu.update()
